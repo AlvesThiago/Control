@@ -12,7 +12,7 @@ import { Label } from "@/components/ui/label";
 
 function RegisterUser(){
     return(
-        <div className="mx-auto h-[470px] w-full max-w-3xl rounded-xl bg-muted/50 hidden">
+        <div className="mx-auto h-[470px] w-full max-w-3xl rounded-xl bg-muted/50 ">
                 <div className="flex flex-col items-center justify-center p-6">
                     <Card className="w-[580px] ">
                         <CardHeader>
