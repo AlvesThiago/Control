@@ -1,7 +1,7 @@
 'use client'
 import { Button } from "@/components/ui/button";
-import DataTableDemo from "@/app/components/tabelaUser";
-import RegisterUser from "@/app/components/registerUser";
+import DataTableDemo from "@/app/_components/tabelaUser";
+import RegisterUser from "@/app/_components/registerUser";
 import { useState } from "react";
 
 export default function AddUserPage() {

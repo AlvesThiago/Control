@@ -1,4 +1,4 @@
-import RegisterNote from "@/app/components/registerNote";
+import RegisterNote from "@/app/_components/registerNote";
 import { Button } from "@/components/ui/button";
 
 export default function AddNotebookPage() {

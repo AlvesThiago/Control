@@ -1,4 +1,4 @@
-import Component from "@/app/components/dashboard";
+import Component from "@/app/_components/dashboard";
 
 export default function Dashboard(){
   return(

@@ -8,7 +8,7 @@ import React from 'react'
 
 function Login() {
   return (
-    <div className='flex justify-center items-center min-h-screen bg-blue-900'>
+    <div className='flex justify-center items-center min-h-screen bg-[url("/FundoLogin.svg")] bg-cover bg-center'>
         <Card className='w-[400px] shadow-xl'>
             <CardHeader>
                 <CardTitle className='text-3xl text-center p-3'>Login</CardTitle>
@@ -29,7 +29,6 @@ function Login() {
                 <Link href={'/admin/management'}>
                     <Button>Login</Button>
                 </Link>
-                
             </CardFooter>
         </Card>
     </div>

@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { AudioWaveform, Blocks, Calendar, Command, Home, Inbox, MessageCircleQuestion, Search, Settings2, Sparkles, Trash2 } from "lucide-react"
+import {  Home, Search, Settings2, Sparkles } from "lucide-react"
 import { SidebarGroupLabel } from "@/components/ui/sidebar"
 import { Sidebar, SidebarContent, SidebarHeader, SidebarRail } from "@/components/ui/sidebar"
 import Link from "next/link"  // Importando Link do Next.js
