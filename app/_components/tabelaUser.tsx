@@ -35,39 +35,30 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
+import { db } from "@/utils/db"
+import { Usuarios } from "@/utils/schema"
 
-const data: Employee[] = [
-  {
-    id: "m5gr84i9",
-    name: "Carlos Silva",
-    cpf: "123.456.789-01",
-    sector: "Volumoso",
-  },
-  {
-    id: "3u1reuv4",
-    name: "Ana Souza",
-    cpf: "234.567.890-12",
-    sector: "Recebimento",
-  },
-  {
-    id: "derv1ws0",
-    name: "João Pereira",
-    cpf: "345.678.901-23",
-    sector: "Retrabalho",
-  },
-  {
-    id: "5kma53ae",
-    name: "Maria Oliveira",
-    cpf: "456.789.012-34",
-    sector: "Esteira",
-  },
-  {
-    id: "bhqecj4p",
-    name: "Luiza Costa",
-    cpf: "567.890.123-45",
-    sector: "Armazenagem",
-  },
-]
+// Função para buscar os dados do banco de dados
+async function fetchListUsuarios() {
+  const result = await db.select({
+    id: Usuarios.id,
+    nome: Usuarios.nome,
+    cpf: Usuarios.cpf,
+    setor: Usuarios.setor,
+    gestor: Usuarios.gestor,
+  })
+  .from(Usuarios)
+  .execute();
+  
+  // Retorna os dados no formato esperado
+  return result.map((item) => ({
+    id: item.id,
+    name: item.nome,
+    cpf: item.cpf,
+    sector: item.setor,
+    gestor: item.gestor,
+  }))
+}
 
 export type Employee = {
   id: string
@@ -100,12 +91,12 @@ export const columns: ColumnDef<Employee>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "name",
+    accessorKey: "name",  // Coluna "Nome"
     header: "Nome",
     cell: ({ row }) => <div className="capitalize">{row.getValue("name")}</div>,
   },
   {
-    accessorKey: "cpf",
+    accessorKey: "cpf",  // Coluna "CPF"
     header: ({ column }) => {
       return (
         <Button
@@ -120,14 +111,19 @@ export const columns: ColumnDef<Employee>[] = [
     cell: ({ row }) => <div className="lowercase">{row.getValue("cpf")}</div>,
   },
   {
-    accessorKey: "sector",
+    accessorKey: "sector",  // Coluna "Setor"
     header: () => <div className="text-right">Setor</div>,
     cell: ({ row }) => {
       return <div className="text-right font-medium">{row.getValue("sector")}</div>
     },
   },
   {
-    id: "actions",
+    accessorKey: "gestor",  // Coluna "Gestor"
+    header: "Gestor",  // Título da coluna
+    cell: ({ row }) => <div className="capitalize">{row.getValue("gestor")}</div>,  // Exibindo o valor do gestor
+  },
+  {
+    id: "actions",  // Coluna de Ações (para ações extras como editar, excluir)
     enableHiding: false,
     cell: ({ row }) => {
       const employee = row.original
@@ -157,11 +153,34 @@ export const columns: ColumnDef<Employee>[] = [
   },
 ]
 
+
 export default function DataTableDemo() {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
   const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
   const [rowSelection, setRowSelection] = React.useState({})
+
+  // Estado para armazenar os dados da tabela
+  const [data, setData] = React.useState<Employee[]>([]) 
+  const [loading, setLoading] = React.useState(true) // Estado de carregamento
+  const [error, setError] = React.useState<string | null>(null) // Estado de erro
+
+  // Fetch os dados do banco quando o componente é montado
+  React.useEffect(() => {
+    const fetchTableData = async () => {
+      setLoading(true)
+      try {
+        const result = await fetchListUsuarios() // Chama a função que busca os dados
+        setData(result) // Atualiza o estado com os dados recebidos
+      } catch (error) {
+        setError("Erro ao carregar dados.") // Caso ocorra erro
+        console.error(error)
+      } finally {
+        setLoading(false)
+      }
+    }
+    fetchTableData()
+  }, []) // Este efeito roda uma vez quando o componente for montado
 
   const table = useReactTable({
     data,
@@ -220,56 +239,62 @@ export default function DataTableDemo() {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            {table.getHeaderGroups().map((headerGroup) => (
-              <TableRow key={headerGroup.id}>
-                {headerGroup.headers.map((header) => {
-                  return (
-                    <TableHead key={header.id}>
-                      {header.isPlaceholder
-                        ? null
-                        : flexRender(
-                            header.column.columnDef.header,
-                            header.getContext()
-                          )}
-                    </TableHead>
-                  )
-                })}
-              </TableRow>
-            ))}
-          </TableHeader>
-          <TableBody>
-            {table.getRowModel().rows?.length ? (
-              table.getRowModel().rows.map((row) => (
-                <TableRow
-                  key={row.id}
-                  data-state={row.getIsSelected() && "selected"}
-                >
-                  {row.getVisibleCells().map((cell) => (
-                    <TableCell key={cell.id}>
-                      {flexRender(
-                        cell.column.columnDef.cell,
-                        cell.getContext()
-                      )}
-                    </TableCell>
-                  ))}
+      {loading ? (
+        <div>Loading...</div>
+      ) : error ? (
+        <div>{error}</div>
+      ) : (
+        <div className="rounded-md border">
+          <Table>
+            <TableHeader>
+              {table.getHeaderGroups().map((headerGroup) => (
+                <TableRow key={headerGroup.id}>
+                  {headerGroup.headers.map((header) => {
+                    return (
+                      <TableHead key={header.id}>
+                        {header.isPlaceholder
+                          ? null
+                          : flexRender(
+                              header.column.columnDef.header,
+                              header.getContext()
+                            )}
+                      </TableHead>
+                    )
+                  })}
                 </TableRow>
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan={columns.length}
-                  className="h-24 text-center"
-                >
-                  No results.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
+              ))}
+            </TableHeader>
+            <TableBody>
+              {table.getRowModel().rows?.length ? (
+                table.getRowModel().rows.map((row) => (
+                  <TableRow
+                    key={row.id}
+                    data-state={row.getIsSelected() && "selected"}
+                  >
+                    {row.getVisibleCells().map((cell) => (
+                      <TableCell key={cell.id}>
+                        {flexRender(
+                          cell.column.columnDef.cell,
+                          cell.getContext()
+                        )}
+                      </TableCell>
+                    ))}
+                  </TableRow>
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan={columns.length}
+                    className="h-24 text-center"
+                  >
+                    No results.
+                  </TableCell>
+                </TableRow>
+              )}
+            </TableBody>
+          </Table>
+        </div>
+      )}
     </div>
   )
 }
