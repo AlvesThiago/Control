@@ -13,7 +13,7 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { ArrowUpDown, ChevronDown, MoreHorizontal } from "lucide-react"
+import {ChevronDown, MoreHorizontal } from "lucide-react"
 
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
@@ -36,38 +36,34 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { db } from "@/utils/db"
-import { Usuarios } from "@/utils/schema"
+import { Notebooks } from "@/utils/schema"
+
+// Definir o tipo para os dados do banco de dados (Notebooks)
+export type Notebook = {
+  id: string
+  serialNumber: string
+  modelo: string
+}
 
 // Função para buscar os dados do banco de dados
-async function fetchListUsuarios() {
+async function fetchListNotes() {
   const result = await db.select({
-    id: Usuarios.id,
-    nome: Usuarios.nome,
-    cpf: Usuarios.cpf,
-    setor: Usuarios.setor,
-    gestor: Usuarios.gestor,
+    id: Notebooks.id,
+    serialNumber: Notebooks.serialNumber,
+    modelo: Notebooks.modelo,
   })
-  .from(Usuarios)
-  .execute();
-  
+  .from(Notebooks)
+  .execute()
+
   // Retorna os dados no formato esperado
   return result.map((item) => ({
     id: item.id,
-    name: item.nome,
-    cpf: item.cpf,
-    sector: item.setor,
-    gestor: item.gestor,
+    serialNumber: item.serialNumber,
+    modelo: item.modelo,
   }))
 }
 
-export type Employee = {
-  id: string
-  name: string
-  cpf: string
-  sector: string
-}
-
-export const columns: ColumnDef<Employee>[] = [
+export const columns: ColumnDef<Notebook>[] = [
   {
     id: "select",
     header: ({ table }) => (
@@ -91,43 +87,20 @@ export const columns: ColumnDef<Employee>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "name",  // Coluna "Nome"
-    header: "Nome",
-    cell: ({ row }) => <div className="capitalize">{row.getValue("name")}</div>,
+    accessorKey: "serialNumber",  // Coluna "Número de Série"
+    header: "Número de Série",
+    cell: ({ row }) => <div className="capitalize">{row.getValue("serialNumber")}</div>,
   },
   {
-    accessorKey: "cpf",  // Coluna "CPF"
-    header: ({ column }) => {
-      return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
-          CPF
-          <ArrowUpDown />
-        </Button>
-      )
-    },
-    cell: ({ row }) => <div className="lowercase">{row.getValue("cpf")}</div>,
+    accessorKey: "modelo",  // Coluna "Modelo"
+    header: "Modelo",
+    cell: ({ row }) => <div className="capitalize">{row.getValue("modelo")}</div>,
   },
   {
-    accessorKey: "sector",  // Coluna "Setor"
-    header: () => <div className="text-right">Setor</div>,
-    cell: ({ row }) => {
-      return <div className="text-right font-medium">{row.getValue("sector")}</div>
-    },
-  },
-  {
-    accessorKey: "gestor",  // Coluna "Gestor"
-    header: "Gestor",  // Título da coluna
-    cell: ({ row }) => <div className="capitalize">{row.getValue("gestor")}</div>,  // Exibindo o valor do gestor
-  },
-  {
-    id: "actions",  // Coluna de Ações (para ações extras como editar, excluir)
+    id: "actions",  // Coluna de Ações
     enableHiding: false,
     cell: ({ row }) => {
-      const employee = row.original
-
+      const notebook = row.original
       return (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -138,10 +111,8 @@ export const columns: ColumnDef<Employee>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Ações</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(employee.id)}
-            >
-              Copiar ID do Usuário
+            <DropdownMenuItem onClick={() => navigator.clipboard.writeText(notebook.id)}>
+              Copiar ID
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem>Atualizar</DropdownMenuItem>
@@ -153,7 +124,6 @@ export const columns: ColumnDef<Employee>[] = [
   },
 ]
 
-
 export default function DataTableNote() {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
@@ -161,7 +131,7 @@ export default function DataTableNote() {
   const [rowSelection, setRowSelection] = React.useState({})
 
   // Estado para armazenar os dados da tabela
-  const [data, setData] = React.useState<Employee[]>([]) 
+  const [data, setData] = React.useState<Notebook[]>([]) 
   const [loading, setLoading] = React.useState(true) // Estado de carregamento
   const [error, setError] = React.useState<string | null>(null) // Estado de erro
 
@@ -170,7 +140,7 @@ export default function DataTableNote() {
     const fetchTableData = async () => {
       setLoading(true)
       try {
-        const result = await fetchListUsuarios() // Chama a função que busca os dados
+        const result = await fetchListNotes() // Chama a função que busca os dados
         setData(result) // Atualiza o estado com os dados recebidos
       } catch (error) {
         setError("Erro ao carregar dados.") // Caso ocorra erro
@@ -206,9 +176,9 @@ export default function DataTableNote() {
       <div className="flex items-center py-4">
         <Input
           placeholder="Pesquisar..."
-          value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
+          value={(table.getColumn("serialNumber")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
-            table.getColumn("name")?.setFilterValue(event.target.value)
+            table.getColumn("serialNumber")?.setFilterValue(event.target.value)
           }
           className="max-w-sm"
         />
