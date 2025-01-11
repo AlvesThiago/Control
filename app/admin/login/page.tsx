@@ -12,7 +12,8 @@ function Login() {
   const [error, setError] = useState('')
   const router = useRouter()  // Agora usa o useRouter de 'next/navigation'
 
-  const handleSubmit = (e) => {
+  // Tipando o parâmetro 'e' como 'React.FormEvent<HTMLFormElement>'
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault()
 
     // Validação simples do login com variáveis de ambiente

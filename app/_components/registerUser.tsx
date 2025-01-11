@@ -13,16 +13,18 @@ import { useState } from "react";
 
 function RegisterUser() {
     const [nome, setNome] = useState("");
+    const [idCracha, setIdCracha] = useState("");
     const [cpf, setCpf] = useState("");
     const [setor, setSetor] = useState("");
     const [gestor, setGestor] = useState("");
     const [message, setMessage] = useState<string | null>(null); 
     const [messageType, setMessageType] = useState<"success" | "error" | null>(null); 
 
-    const RegistrodeUsuarios = async (nome: string, cpf: string, setor: string, gestor: string) => {
+    const RegistrodeUsuarios = async (nome: string, idcracha: string, cpf: string, setor: string, gestor: string) => {
         try {
             const result = await db.insert(Usuarios).values({
                 nome: nome || '',
+                idcracha: idCracha || '',
                 cpf: cpf || '',
                 setor: setor || '',
                 gestor: gestor || '',
@@ -37,7 +39,7 @@ function RegisterUser() {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        RegistrodeUsuarios(nome, cpf, setor, gestor)
+        RegistrodeUsuarios(nome, idCracha, cpf, setor, gestor)
             .then(() => {
                 // Atualiza a mensagem de sucesso
                 setMessage("Usuário cadastrado com sucesso!");
@@ -45,6 +47,7 @@ function RegisterUser() {
 
                 // Limpa os campos do formulário
                 setNome("");
+                setIdCracha("");
                 setCpf("");
                 setSetor("");
                 setGestor("");
@@ -67,7 +70,7 @@ function RegisterUser() {
     };
 
     return (
-        <div className="mx-auto h-[580px] w-full max-w-3xl rounded-xl bg-muted/50">
+        <div className="mx-auto h-[625px] w-full max-w-3xl rounded-xl bg-muted/50">
             <div className="flex flex-col items-center justify-center p-6">
                 <Card className="w-[580px]">
                     <CardHeader>
@@ -83,6 +86,16 @@ function RegisterUser() {
                                         placeholder="Nome completo"
                                         value={nome}
                                         onChange={(e) => setNome(e.target.value)}
+                                    />
+                                </div>
+                                <div className="flex flex-col space-y-1.5">
+                                    <Label htmlFor="Idcracha">ID Crachá</Label>
+                                    <Input
+                                        type="number"
+                                        id="Idcracha"
+                                        placeholder="Ex: 123455"
+                                        value={idCracha}
+                                        onChange={(e) => setIdCracha(e.target.value)}
                                     />
                                 </div>
                                 <div className="flex flex-col space-y-1.5">

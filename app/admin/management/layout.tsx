@@ -1,19 +1,24 @@
-import { AppSidebar } from "@/components/app-sidebar"
-import { NavActions } from "@/components/nav-actions"
+import { ReactNode } from "react"; // Importando ReactNode
+import { AppSidebar } from "@/components/app-sidebar";
+import { NavActions } from "@/components/nav-actions";
 import {
   Breadcrumb,
   BreadcrumbItem,
   BreadcrumbList,
   BreadcrumbPage,
-} from "@/components/ui/breadcrumb"
-import { Separator } from "@/components/ui/separator"
+} from "@/components/ui/breadcrumb";
+import { Separator } from "@/components/ui/separator";
 import {
   SidebarInset,
   SidebarProvider,
   SidebarTrigger,
-} from "@/components/ui/sidebar"
+} from "@/components/ui/sidebar";
 
-function Page({children}) {
+interface PageProps {
+  children: ReactNode; // Definindo o tipo de 'children' como ReactNode
+}
+
+function Page({ children }: PageProps) {
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -41,7 +46,7 @@ function Page({children}) {
         </div>
       </SidebarInset>
     </SidebarProvider>
-  )
+  );
 }
 
 export default Page;
