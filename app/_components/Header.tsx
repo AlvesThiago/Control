@@ -4,11 +4,11 @@ import React from 'react'
 
 function Header() {
   return (
-    <div className="p-4 shadow-md">
+    <div className="p-4 shadow-md bg-[#001220]">
       <div className="flex justify-between items-center">
-        <h2 className="text-lg font-bold">Controle de Equipamentos</h2>
+        <h2 className="text-lg font-bold text-white">Controle de Equipamentos</h2>
         <Link href={'/admin/login'}>
-            <Button>
+            <Button variant={'outline'}>
                 Entrar
             </Button>
         </Link>
