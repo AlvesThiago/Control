@@ -26,7 +26,7 @@ const data = {
     },
     {
       title: "Associar",
-      url: "#",
+      url: "/admin/management/associar",
       icon: Settings2,
       isActive: true,
     },

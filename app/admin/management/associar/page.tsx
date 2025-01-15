@@ -1,10 +1,10 @@
-import React from 'react'
+import Atribuir from "@/app/_components/atribuir"
 
 function Associar() {
+
+
   return (
-    <div>
-        
-    </div>
+    <Atribuir />
   )
 }
 

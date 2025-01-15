@@ -17,17 +17,19 @@ function RegisterUser() {
     const [cpf, setCpf] = useState("");
     const [setor, setSetor] = useState("");
     const [gestor, setGestor] = useState("");
+    const [turno, setTurno] = useState("");
     const [message, setMessage] = useState<string | null>(null); 
     const [messageType, setMessageType] = useState<"success" | "error" | null>(null); 
 
-    const RegistrodeUsuarios = async (nome: string, idcracha: string, cpf: string, setor: string, gestor: string) => {
+    const RegistrodeUsuarios = async (nome: string, idcracha: string, cpf: string, setor: string, gestor: string, turno: string) => {
         try {
             const result = await db.insert(Usuarios).values({
                 nome: nome || '',
-                idcracha: idCracha || '',
+                idcracha: idcracha || '',
                 cpf: cpf || '',
                 setor: setor || '',
                 gestor: gestor || '',
+                turno: turno || '',
             });
             return result;
         } catch (error) {
@@ -39,7 +41,7 @@ function RegisterUser() {
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
 
-        RegistrodeUsuarios(nome, idCracha, cpf, setor, gestor)
+        RegistrodeUsuarios(nome, idCracha, cpf, setor, gestor, turno)
             .then(() => {
                 // Atualiza a mensagem de sucesso
                 setMessage("Usuário cadastrado com sucesso!");
@@ -51,6 +53,7 @@ function RegisterUser() {
                 setCpf("");
                 setSetor("");
                 setGestor("");
+                setTurno("");
 
                 setTimeout(() => {
                     setMessage(null);
@@ -70,7 +73,7 @@ function RegisterUser() {
     };
 
     return (
-        <div className="mx-auto h-[625px] w-full max-w-3xl rounded-xl bg-muted/50">
+        <div className="mx-auto h-[700px] w-full max-w-3xl rounded-xl bg-muted/50">
             <div className="flex flex-col items-center justify-center p-6">
                 <Card className="w-[580px]">
                     <CardHeader>
@@ -124,6 +127,15 @@ function RegisterUser() {
                                         placeholder="Digite o nome do seu gestor"
                                         value={gestor}
                                         onChange={(e) => setGestor(e.target.value)}
+                                    />
+                                </div>
+                                <div className="flex flex-col space-y-1.5">
+                                    <Label htmlFor="turno">Turno</Label>
+                                    <Input
+                                        id="turno"
+                                        placeholder="Digite o seu turno"
+                                        value={turno}
+                                        onChange={(e) => setTurno(e.target.value)}
                                     />
                                 </div>
                             </div>
