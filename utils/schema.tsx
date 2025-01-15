@@ -14,7 +14,8 @@ export const Usuarios = pgTable('usuarios', {
 export const Notebooks=pgTable('notebooks',{
     id: serial('id').primaryKey(),
     serialNumber: varchar('serialNumber', { length: 255 }).notNull().unique(),
-    modelo: varchar('modelo')  
+    modelo: varchar('modelo'),
+    setorNote: varchar('setorNote').notNull()  
 })
 
 export const Historico=pgTable('historico',{

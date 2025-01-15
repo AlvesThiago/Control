@@ -16,14 +16,16 @@ function RegisterNote(){
 
     const [serialNumber, setSerialNumber] = useState("");
     const [modelo, setModelo] = useState("");
+    const [setorNote, setSetorNote] = useState("");
     const [message, setMessage] = useState<string | null>(null); 
     const [messageType, setMessageType] = useState<"success" | "error" | null>(null);
 
-    const RegistroNotebook = async (serialNumber: string, modelo: string) => {
+    const RegistroNotebook = async (serialNumber: string, modelo: string, setorNote: string) => {
         try{
             const result = await db.insert(Notebooks).values({
                 serialNumber: serialNumber || '',
-                modelo: modelo || ''
+                modelo: modelo || '',
+                setorNote: setorNote || ''
             });
             return result;
         }catch (error){
@@ -35,7 +37,7 @@ function RegisterNote(){
     const handleSubmit = (e: React.FormEvent) =>{
         e.preventDefault();
 
-        RegistroNotebook(serialNumber, modelo)
+        RegistroNotebook(serialNumber, modelo, setorNote)
         .then(() => {
             // Atualiza a mensagem de sucesso
             setMessage("Usuário cadastrado com sucesso!");
@@ -43,6 +45,8 @@ function RegisterNote(){
 
             setSerialNumber("");
             setModelo("");
+            setSetorNote("");
+
 
             setTimeout(() => {
                 setMessage(null);
@@ -62,7 +66,7 @@ function RegisterNote(){
     }
 
     return(
-        <div className="mx-auto h-[420px] w-full max-w-3xl rounded-xl bg-muted/50">
+        <div className="mx-auto h-[480px] w-full max-w-3xl rounded-xl bg-muted/50">
                 <div className="flex flex-col items-center justify-center p-6">
                     <Card className="w-[580px] ">
                         <CardHeader>
@@ -80,12 +84,20 @@ function RegisterNote(){
                                         onChange={(e) => setSerialNumber(e.target.value)} />
                                     </div>
                                     <div className="flex flex-col space-y-1.5">
-                                        <Label htmlFor="numbernote">Modelo</Label>
+                                        <Label htmlFor="modeloNote">Modelo</Label>
                                         <Input 
-                                        id="numbernote" 
+                                        id="modeloNote" 
                                         placeholder="Ex: I3, I5, I7 ..."
                                         value={modelo}
                                         onChange={(e) => setModelo(e.target.value)} />
+                                    </div>
+                                    <div className="flex flex-col space-y-1.5">
+                                        <Label htmlFor="setorNote">Setor</Label>
+                                        <Input 
+                                        id="setorNote" 
+                                        placeholder="Ex: Granel"
+                                        value={setorNote}
+                                        onChange={(e) => setSetorNote(e.target.value)} />
                                     </div>
                                 </div>
                                 <div className="flex justify-end mt-10">

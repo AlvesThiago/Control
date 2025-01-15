@@ -18,8 +18,8 @@ function RegisterUser() {
     const [setor, setSetor] = useState("");
     const [gestor, setGestor] = useState("");
     const [turno, setTurno] = useState("");
-    const [message, setMessage] = useState<string | null>(null); 
-    const [messageType, setMessageType] = useState<"success" | "error" | null>(null); 
+    const [message, setMessage] = useState<string | null>(null);
+    const [messageType, setMessageType] = useState<"success" | "error" | null>(null);
 
     const RegistrodeUsuarios = async (nome: string, idcracha: string, cpf: string, setor: string, gestor: string, turno: string) => {
         try {
@@ -43,28 +43,22 @@ function RegisterUser() {
 
         RegistrodeUsuarios(nome, idCracha, cpf, setor, gestor, turno)
             .then(() => {
-                // Atualiza a mensagem de sucesso
                 setMessage("Usuário cadastrado com sucesso!");
                 setMessageType("success");
-
-                // Limpa os campos do formulário
                 setNome("");
                 setIdCracha("");
                 setCpf("");
                 setSetor("");
                 setGestor("");
                 setTurno("");
-
                 setTimeout(() => {
                     setMessage(null);
                     setMessageType(null);
                 }, 3000);
             })
             .catch((error) => {
-                // Atualiza a mensagem de erro
                 setMessage("Erro ao cadastrar usuário: " + error.message);
                 setMessageType("error");
-
                 setTimeout(() => {
                     setMessage(null);
                     setMessageType(null);
@@ -73,93 +67,92 @@ function RegisterUser() {
     };
 
     return (
-        <div className="mx-auto h-[700px] w-full max-w-3xl rounded-xl bg-muted/50">
-            <div className="flex flex-col items-center justify-center p-6">
-                <Card className="w-[580px]">
-                    <CardHeader>
-                        <CardTitle className="text-2xl mb-6">Cadastro</CardTitle>
-                    </CardHeader>
-                    <CardContent className="mb-6">
-                        <form onSubmit={handleSubmit}>
-                            <div className="grid w-full items-center gap-4">
-                                <div className="flex flex-col space-y-1.5">
-                                    <Label htmlFor="name">Colaborador</Label>
-                                    <Input
-                                        id="name"
-                                        placeholder="Nome completo"
-                                        value={nome}
-                                        onChange={(e) => setNome(e.target.value)}
-                                    />
-                                </div>
-                                <div className="flex flex-col space-y-1.5">
-                                    <Label htmlFor="Idcracha">ID Crachá</Label>
-                                    <Input
-                                        type="number"
-                                        id="Idcracha"
-                                        placeholder="Ex: 123455"
-                                        value={idCracha}
-                                        onChange={(e) => setIdCracha(e.target.value)}
-                                    />
-                                </div>
-                                <div className="flex flex-col space-y-1.5">
-                                    <Label htmlFor="cpf">CPF</Label>
-                                    <Input
-                                        type="number"
-                                        id="cpf"
-                                        placeholder="Ex: 123.123.123.32"
-                                        value={cpf}
-                                        onChange={(e) => setCpf(e.target.value)}
-                                    />
-                                </div>
-                                <div className="flex flex-col space-y-1.5">
-                                    <Label htmlFor="setor">Setor</Label>
-                                    <Input
-                                        id="setor"
-                                        placeholder="Digite o nome do setor"
-                                        value={setor}
-                                        onChange={(e) => setSetor(e.target.value)}
-                                    />
-                                </div>
-                                <div className="flex flex-col space-y-1.5">
-                                    <Label htmlFor="gestor">Gestor</Label>
-                                    <Input
-                                        id="gestor"
-                                        placeholder="Digite o nome do seu gestor"
-                                        value={gestor}
-                                        onChange={(e) => setGestor(e.target.value)}
-                                    />
-                                </div>
-                                <div className="flex flex-col space-y-1.5">
-                                    <Label htmlFor="turno">Turno</Label>
-                                    <Input
-                                        id="turno"
-                                        placeholder="Digite o seu turno"
-                                        value={turno}
-                                        onChange={(e) => setTurno(e.target.value)}
-                                    />
-                                </div>
+        <div className="container mx-auto px-4 py-8">
+            <Card className="w-full max-w-4xl mx-auto">
+                <CardHeader>
+                    <CardTitle className="text-2xl font-bold text-center">Cadastro de Usuário</CardTitle>
+                </CardHeader>
+                <CardContent>
+                    <form onSubmit={handleSubmit} className="space-y-6">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div className="space-y-2">
+                                <Label htmlFor="name">Colaborador</Label>
+                                <Input
+                                    id="name"
+                                    placeholder="Nome completo"
+                                    value={nome}
+                                    onChange={(e) => setNome(e.target.value)}
+                                />
                             </div>
-                            <div className="flex justify-end mt-10">
-                                <Button type="submit">Cadastrar Usuário</Button>
+                            <div className="space-y-2">
+                                <Label htmlFor="Idcracha">ID Crachá</Label>
+                                <Input
+                                    type="number"
+                                    id="Idcracha"
+                                    placeholder="Ex: 123455"
+                                    value={idCracha}
+                                    onChange={(e) => setIdCracha(e.target.value)}
+                                />
                             </div>
-                        </form>
+                            <div className="space-y-2">
+                                <Label htmlFor="cpf">CPF</Label>
+                                <Input
+                                    type="number"
+                                    id="cpf"
+                                    placeholder="Ex: 123.123.123.32"
+                                    value={cpf}
+                                    onChange={(e) => setCpf(e.target.value)}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="setor">Setor</Label>
+                                <Input
+                                    id="setor"
+                                    placeholder="Digite o nome do setor"
+                                    value={setor}
+                                    onChange={(e) => setSetor(e.target.value)}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="gestor">Gestor</Label>
+                                <Input
+                                    id="gestor"
+                                    placeholder="Digite o nome do seu gestor"
+                                    value={gestor}
+                                    onChange={(e) => setGestor(e.target.value)}
+                                />
+                            </div>
+                            <div className="space-y-2">
+                                <Label htmlFor="turno">Turno</Label>
+                                <Input
+                                    id="turno"
+                                    placeholder="Digite o seu turno"
+                                    value={turno}
+                                    onChange={(e) => setTurno(e.target.value)}
+                                />
+                            </div>
+                        </div>
+                        <div className="flex justify-end">
+                            <Button type="submit" className="w-full md:w-auto">Cadastrar Usuário</Button>
+                        </div>
+                    </form>
 
-                        {message && (
-                            <div
-                                className={`mt-4 text-center p-2 rounded-md ${
-                                    messageType === "success"
-                                        ? "bg-green-500 text-white"
-                                        : "bg-red-500 text-white"
-                                }`}
-                            >
-                                {message}
-                            </div>
-                        )}
-                    </CardContent>
-                </Card>
-            </div>
+                    {message && (
+                        <div
+                            className={`mt-4 text-center p-2 rounded-md ${
+                                messageType === "success"
+                                    ? "bg-green-500 text-white"
+                                    : "bg-red-500 text-white"
+                            }`}
+                        >
+                            {message}
+                        </div>
+                    )}
+                </CardContent>
+            </Card>
         </div>
     );
 }
 
 export default RegisterUser;
+
