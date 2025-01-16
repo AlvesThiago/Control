@@ -5,6 +5,7 @@ import { db } from '@/utils/db';
 import { AtribuirNote, Notebooks, Usuarios } from '@/utils/schema';
 import { eq } from 'drizzle-orm';
 import Notification from '../_components/Notification';
+import { Button } from '@/components/ui/button';
 
 type Assignment = {
     id: number;
@@ -209,11 +210,11 @@ function Atribuir() {
     }, [notification]);
 
     return (
-        <div className="min-h-screen bg-gray-100 rounded-3xl p-4 sm:p-6 lg:p-8">
+        <div className="min-h-screen">
             <div className="max-w-7xl mx-auto bg-white rounded-xl shadow-md overflow-hidden">
                 <div className="md:flex">
                     {/* Formulário de Atribuição */}
-                    <div className="md:w-1/2 p-8">
+                    <div className="md:w-1/2 p-8 border-b border-l border-t rounded-b-xl rounded-t-xl">
                         <div className="uppercase tracking-wide text-sm text-indigo-500 font-semibold mb-1">Sistema de Atribuição</div>
                         <h1 className="block mt-1 text-2xl leading-tight font-medium text-black">Notebook e Usuários</h1>
                         <p className="mt-2 text-gray-500 text-sm">Atribua até 3 usuários a um notebook.</p>
@@ -286,13 +287,13 @@ function Atribuir() {
                                         </div>
                                     </div>
                                 ))}
-                                <button
-                                    className="mt-8 flex items-center justify-center w-full bg-indigo-500 text-white font-bold py-3 px-4 rounded-lg hover:bg-indigo-600 focus:outline-none focus:shadow-outline transition duration-150 ease-in-out"
+                                <Button
+                                    className="mt-8 flex items-center justify-center w-full font-bold"
                                     onClick={() => atribuicao(users.filter(user => user !== ''), notebook)}
                                 >
                                     <PlusCircle className="mr-2" />
                                     Atribuir
-                                </button>
+                                </Button>
                             </>
                         )}
                         {notification && (
@@ -301,7 +302,7 @@ function Atribuir() {
                     </div>
 
                     {/* Lista de Atribuições */}
-                    <div className="md:w-1/2 p-8 bg-gray-50 h-screen flex flex-col">
+                    <div className="md:w-1/2 p-8 bg-gray-50 h-screen flex flex-col  border-b border-r border-t rounded-b-xl rounded-t-xl">
                         <h2 className="text-2xl font-semibold text-gray-800 mb-4">Atribuições</h2>
                         <div className="overflow-y-auto flex-grow">
                             {assignments.length === 0 ? (

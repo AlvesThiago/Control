@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import {  Home, Search, Settings2, Sparkles } from "lucide-react"
+import {  History, Home, Laptop, Search, Settings2, Sparkles, Users } from "lucide-react"
 import { SidebarGroupLabel } from "@/components/ui/sidebar"
 import { Sidebar, SidebarContent, SidebarHeader, SidebarRail } from "@/components/ui/sidebar"
 import Link from "next/link"  // Importando Link do Next.js
@@ -11,18 +11,18 @@ const data = {
   navMain: [
     {
       title: "Home",
-      url: "/admin/management",  // Corrigi a URL para usar a barra inicial
+      url: "/admin/management",  
       icon: Home,
     },
     {
       title: "Add User",
-      url: "/admin/management/add-user",  // Corrigi a URL para usar a barra inicial
-      icon: Search,
+      url: "/admin/management/add-user",  
+      icon: Users,
     },
     {
       title: "Add Notebook",
-      url: "/admin/management/add-notebook",  // Corrigi a URL para usar a barra inicial
-      icon: Sparkles,
+      url: "/admin/management/add-notebook",  
+      icon: Laptop,
     },
     {
       title: "Associar",
@@ -31,9 +31,9 @@ const data = {
       isActive: true,
     },
     {
-      title: "Gestores",
+      title: "Histórico",
       url: "#",
-      icon: Settings2,
+      icon: History,
     },
   ]
 }

@@ -16,7 +16,7 @@ import { Label } from "@/components/ui/label"
 
 export function Main(){
     return(
-        <div className='flex items-center justify-center min-h-screen bg-[url("/fundoMain.svg")] bg-cover bg-center'>
+        <div className='flex items-center justify-center min-h-screen bg-[url("/Fundo.svg")] bg-cover bg-center'>
             <Card className="w-[800px] flex flex-col justify-center">
                 <CardHeader className="mt-10">
                     <CardTitle className="text-center text-3xl mb-2">Controle de Notebook</CardTitle>
