@@ -22,6 +22,7 @@ export const Historico=pgTable('historico',{
     id: serial('id').primaryKey(),
     usuarios: varchar('usuarios', { length: 255 }),
     notebook: varchar('notebook', { length: 255 }),
+    tipo: varchar('tipo'),
     createdAt: timestamp('createdAt').defaultNow().notNull(),
 })
 
