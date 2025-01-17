@@ -1,97 +1,95 @@
 'use client'
 
 import * as React from "react"
+import { useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import {
   Card,
   CardContent,
-  CardDescription,
   CardFooter,
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
-import { db } from "@/utils/db"
-import { Historico, Usuarios, Notebooks, AtribuirNote } from "@/utils/schema"
-import { eq } from 'drizzle-orm'; // Drizzle ORM eq importado de maneira correta
+import Image from 'next/image'
+import { checkNotebookStatus, updateNotebookStatus } from "@/utils/notebookStatus"
+import Notification from "./Notification"
 
 export function Main() {
-  // Definindo os estados para os inputs
   const [idcracha, setIdcracha] = React.useState<string>("")
   const [serialNumber, setSerialNumber] = React.useState<string>("")
+  const [loading, setLoading] = React.useState<boolean>(false)
+  const [notification, setNotification] = React.useState<{ id: number; message: string; type: 'success' | 'error' } | null>(null)
 
-  // Função para validar a atribuição e registrar no histórico
-  const validaRetirada = async (idcracha: string, serialNumber: string) => {
+  const handleAction = async () => {
+    setLoading(true)
+    setNotification(null)
     try {
-      // 1. Verifique se o usuário existe
-      const usuario = await db.select().from(Usuarios).where(eq(Usuarios.idcracha, idcracha)).limit(1)
-
-      if (usuario.length === 0) {
-        alert('Usuário não encontrado!')
-        return
-      }
-
-      // 2. Verifique se o notebook existe
-      const notebook = await db.select().from(Notebooks).where(eq(Notebooks.serialNumber, serialNumber)).limit(1)
-
-      if (notebook.length === 0) {
-        alert('Notebook não encontrado!')
-        return
-      }
-
-      // 3. Verifique se o notebook está atribuído ao usuário pelo nome
-      const atribuicao = await db.select().from(AtribuirNote)
-        .where(eq(AtribuirNote.notebook, serialNumber))
-        .limit(1)
-
-      if (atribuicao.length === 0) {
-        alert('Este notebook não está atribuído a este usuário!')
-        return
-      }
-
-      // Verificar se o nome do usuário atribuído corresponde ao idcracha
-      const nomeAtribuido = atribuicao[0]?.nomet1 || ""; // Supondo que o nome esteja na coluna nomet1
-      const usuarioCorrespondente = await db.select().from(Usuarios).where(eq(Usuarios.nome, nomeAtribuido)).limit(1)
-
-      if (usuarioCorrespondente.length === 0) {
-        alert('Nome do usuário atribuído não corresponde ao crachá!')
-        return
-      }
-
-      // 4. Se tudo estiver correto, insira no histórico
-      await db.insert(Historico).values({
-        usuarios: usuario[0].nome, // Pega o nome do primeiro usuário encontrado
-        notebook: notebook[0].serialNumber, // Pega o modelo do primeiro notebook encontrado
-        tipo: 'Retirada', // Tipo de ação
-        createdAt: new Date(), // Data de retirada
+      const { usuario, notebook, isCheckedOut } = await checkNotebookStatus(idcracha, serialNumber)
+      
+      const novaAcao = isCheckedOut ? 'Devolução' : 'Retirada'
+      await updateNotebookStatus(usuario.nome, notebook.serialNumber, !isCheckedOut)
+      
+      setNotification({
+        id: Date.now(),
+        message: `${novaAcao} registrada com sucesso para o usuário ${usuario.nome} e notebook ${notebook.serialNumber}!`,
+        type: 'success'
       })
-
-      alert('Retirada registrada com sucesso!')
-
+      
+      // Limpar os campos após a ação bem-sucedida
+      setIdcracha("")
+      setSerialNumber("")
     } catch (error) {
-      console.error("Erro ao validar a retirada:", error)
-      alert('Ocorreu um erro ao validar a retirada.')
+      if (error instanceof Error) {
+        setNotification({
+          id: Date.now(),
+          message: error.message,
+          type: 'error'
+        })
+      } else {
+        setNotification({
+          id: Date.now(),
+          message: 'Ocorreu um erro ao processar a ação.',
+          type: 'error'
+        })
+      }
+    } finally {
+      setLoading(false)
     }
   }
+
+  const clearNotification = () => setNotification(null)
+
+  useEffect(() => {
+    if (notification) {
+      const timer = setTimeout(() => {
+        clearNotification()
+      }, 5000) // 5 segundos
+
+      return () => clearTimeout(timer)
+    }
+  }, [notification])
 
   return (
     <div className='flex items-center justify-center min-h-screen bg-[url("/Fundo.svg")] bg-cover bg-center'>
       <Card className="w-[800px] flex flex-col justify-center">
-        <CardHeader className="mt-10">
-          <CardTitle className="text-center text-3xl mb-2">Controle de Notebook</CardTitle>
-          <CardDescription className="text-center">Rápido e fácil.</CardDescription>
+        <CardHeader className="mt-8 mb-12">
+          <div className="flex justify-center items-center mb-1">
+            <Image src={'/LogoIS.png'} alt='Logo' width={80} height={40} />
+          </div>
+          <CardTitle className="text-center text-3xl ">Controle de Notebook</CardTitle>
         </CardHeader>
         <CardContent className="mb-20">
           <form onSubmit={(e) => e.preventDefault()}>
             <div className="grid w-full items-center gap-4 ">
               <div className="flex flex-col space-y-1.5 ">
-                <Label htmlFor="idcracha" className="font-bold">Crácha</Label>
+                <Label htmlFor="idcracha" className="font-bold">Crachá</Label>
                 <Input
                   id="idcracha"
                   value={idcracha}
-                  onChange={(e) => setIdcracha(e.target.value)} // Atualiza o estado do crachá
-                  placeholder="Encoste o seu crácha"
+                  onChange={(e) => setIdcracha(e.target.value)} 
+                  placeholder="Encoste o seu crachá"
                 />
               </div>
               <div className="flex flex-col space-y-1.5">
@@ -99,22 +97,36 @@ export function Main() {
                 <Input
                   id="serialNumber"
                   value={serialNumber}
-                  onChange={(e) => setSerialNumber(e.target.value)} // Atualiza o estado do serialNumber
+                  onChange={(e) => setSerialNumber(e.target.value)} 
                   placeholder="Bipe o QRcode"
                 />
               </div>
             </div>
           </form>
+          {notification && (
+            <Notification
+              key={notification.id}
+              message={notification.message}
+              type={notification.type}
+            />
+          )}
         </CardContent>
         <CardFooter className="flex justify-between">
-          <Button variant="outline">Cancelar</Button>
+          <Button variant="outline" onClick={() => {
+            setIdcracha("")
+            setSerialNumber("")
+          }}>
+            Cancelar
+          </Button>
           <Button
-            onClick={() => validaRetirada(idcracha, serialNumber)} // Passa os estados diretamente para a função
+            onClick={handleAction}
+            disabled={loading || !idcracha || !serialNumber}
           >
-            Verificar
+            {loading ? "Processando..." : "Verificar"}
           </Button>
         </CardFooter>
       </Card>
     </div>
   )
 }
+

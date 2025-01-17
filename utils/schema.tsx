@@ -1,5 +1,5 @@
 
-import { pgTable, serial, timestamp, varchar } from "drizzle-orm/pg-core";
+import { pgTable, serial, timestamp, varchar, boolean } from "drizzle-orm/pg-core";
 
 export const Usuarios = pgTable('usuarios', {
     id: serial('id').primaryKey(),
@@ -33,3 +33,11 @@ export const AtribuirNote = pgTable('atribuir', {
     nomet3: varchar('nomet3'),
     notebook: varchar('notebook').notNull()
 })
+
+export const NotebookStatus = pgTable('notebook_status', {
+    id: serial('id').primaryKey(),
+    notebookId: varchar('notebook_id', { length: 255 }).notNull().unique(),
+    userId: varchar('user_id', { length: 255 }),
+    isCheckedOut: boolean('is_checked_out').notNull().default(false),
+    lastUpdated: timestamp('last_updated').defaultNow().notNull(),
+});
