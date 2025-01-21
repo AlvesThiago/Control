@@ -26,6 +26,7 @@ function Atribuir() {
         const fetchAssignments = async () => {
             try {
                 const result = await db.select().from(AtribuirNote).execute();
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
                 const fetchedAssignments: Assignment[] = await Promise.all(result.map(async (assignment: any) => {
                     const notebookSetorResult = await db.select().from(Notebooks).where(eq(Notebooks.serialNumber, assignment.notebook)).execute();
                     const notebookSetor = notebookSetorResult[0]?.setorNote || 'Desconhecido'; // Valor padrão caso o setor não seja encontrado
@@ -60,7 +61,7 @@ function Atribuir() {
                 return;
             }
 
-            for (let nome of nomes) {
+            for (const nome of nomes) {
                 const usuarioExistente = await db.select().from(Usuarios).where(eq(Usuarios.nome, nome)).execute();
                 if (usuarioExistente.length === 0) {
                     setNotification({ message: `Usuário ${nome} não encontrado!`, type: 'error' });
@@ -130,7 +131,7 @@ function Atribuir() {
             const notebookSetor = notebookExistente[0].setorNote?.trim().toLowerCase();
 
             // Validate each user
-            for (let nome of [nomet1, nomet2, nomet3].filter(Boolean)) {
+            for (const nome of [nomet1, nomet2, nomet3].filter(Boolean)) {
                 const usuarioExistente = await db.select().from(Usuarios).where(eq(Usuarios.nome, nome)).execute();
                 if (usuarioExistente.length === 0) {
                     setNotification({ message: `Usuário ${nome} não encontrado!`, type: 'error' });
@@ -215,7 +216,7 @@ function Atribuir() {
                 <div className="md:flex">
                     {/* Formulário de Atribuição */}
                     <div className="md:w-1/2 p-8 border-b border-l border-t rounded-b-xl rounded-t-xl">
-                        <div className="uppercase tracking-wide text-sm text-indigo-500 font-semibold mb-1">Sistema de Atribuição</div>
+                        <div className="uppercase tracking-wide text-sm  font-semibold mb-1">Sistema de Atribuição</div>
                         <h1 className="block mt-1 text-2xl leading-tight font-medium text-black">Notebook e Usuários</h1>
                         <p className="mt-2 text-gray-500 text-sm">Atribua até 3 usuários a um notebook.</p>
 

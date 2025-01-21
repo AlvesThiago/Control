@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import {  History, Home, Laptop, Search, Settings2, Sparkles, Users } from "lucide-react"
+import {  History, Home, Laptop, Settings2, Users } from "lucide-react"
 import { SidebarGroupLabel } from "@/components/ui/sidebar"
 import { Sidebar, SidebarContent, SidebarHeader, SidebarRail } from "@/components/ui/sidebar"
 import Link from "next/link"  // Importando Link do Next.js
@@ -32,7 +32,7 @@ const data = {
     },
     {
       title: "Histórico",
-      url: "#",
+      url: "/admin/management/historico",
       icon: History,
     },
   ]
