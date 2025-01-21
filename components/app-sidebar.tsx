@@ -40,6 +40,7 @@ const data = {
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   // Definição do componente NavMain dentro de AppSidebar
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   function NavMain({ items }: { items: Array<any> }) {
     return (
       <nav>
