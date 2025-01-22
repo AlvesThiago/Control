@@ -1,6 +1,6 @@
 import { db } from "@/utils/db"
 import { Usuarios, Notebooks, AtribuirNote, NotebookStatus, Historico } from "@/utils/schema"
-import { eq, and, or } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 
 export async function checkNotebookStatus(idcracha: string, serialNumber: string) {
   // 1. Verifique se o usuário existe
@@ -40,10 +40,15 @@ export async function checkNotebookStatus(idcracha: string, serialNumber: string
   if (status.length === 0) {
     // Se não existir um status, crie um
     await db.insert(NotebookStatus).values({
-      notebookId: notebook[0].serialNumber,
-      isCheckedOut: false,
+      notebookId: notebook[0].serialNumber,  // notebookId é obrigatório
+      isCheckedOut: false,  // isCheckedOut é passado corretamente
+      userId: null,  // Como o notebook não está "checked out", o userId pode ser nulo
+      lastUpdated: new Date()  // Defina o lastUpdated com a data atual
     })
-    status = [{ isCheckedOut: false }]
+    status = [{
+      isCheckedOut: false, notebookId: notebook[0].serialNumber, userId: null, lastUpdated: new Date(),
+      id: 0
+    }]
   }
 
   return {
@@ -58,8 +63,8 @@ export async function updateNotebookStatus(usuario: string, notebook: string, is
   await db.update(NotebookStatus)
     .set({ 
       isCheckedOut: isCheckedOut, 
-      userId: isCheckedOut ? usuario : null,
-      lastUpdated: new Date()
+      userId: isCheckedOut ? usuario : null,  // Se estiver "checked out", atribua o usuario, senão null
+      lastUpdated: new Date()  // Sempre atualize o campo lastUpdated
     })
     .where(eq(NotebookStatus.notebookId, notebook))
 
@@ -71,4 +76,3 @@ export async function updateNotebookStatus(usuario: string, notebook: string, is
     createdAt: new Date(),
   })
 }
-
