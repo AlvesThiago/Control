@@ -2,10 +2,10 @@
 
 import * as React from "react"
 import {
-  ColumnDef,
-  ColumnFiltersState,
-  SortingState,
-  VisibilityState,
+  type ColumnDef,
+  type ColumnFiltersState,
+  type SortingState,
+  type VisibilityState,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
@@ -27,30 +27,23 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
 import { Input } from "@/components/ui/input"
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table"
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { db } from "@/utils/db"
 import { Usuarios } from "@/utils/schema"
 
 // Função para buscar os dados do banco de dados
-async function fetchListUsuarios() {
-  const result = await db.select({
-    id: Usuarios.id,
-    nome: Usuarios.nome,
-    cpf: Usuarios.cpf,
-    setor: Usuarios.setor,
-    gestor: Usuarios.gestor,
-  })
-  .from(Usuarios)
-  .execute();
-  
-  // Retorna os dados no formato esperado
+async function fetchListUsuarios(): Promise<Employee[]> {
+  const result = await db
+    .select({
+      id: Usuarios.id,
+      nome: Usuarios.nome,
+      cpf: Usuarios.cpf,
+      setor: Usuarios.setor,
+      gestor: Usuarios.gestor,
+    })
+    .from(Usuarios)
+    .execute()
+
   return result.map((item) => ({
     id: item.id,
     name: item.nome,
@@ -61,10 +54,11 @@ async function fetchListUsuarios() {
 }
 
 export type Employee = {
-  id: string
+  id: number
   name: string
   cpf: string
   sector: string
+  gestor: string
 }
 
 export const columns: ColumnDef<Employee>[] = [
@@ -72,10 +66,7 @@ export const columns: ColumnDef<Employee>[] = [
     id: "select",
     header: ({ table }) => (
       <Checkbox
-        checked={
-          table.getIsAllPageRowsSelected() ||
-          (table.getIsSomePageRowsSelected() && "indeterminate")
-        }
+        checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
         onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
         aria-label="Select all"
       />
@@ -91,18 +82,15 @@ export const columns: ColumnDef<Employee>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: "name",  // Coluna "Nome"
+    accessorKey: "name", // Coluna "Nome"
     header: "Nome",
     cell: ({ row }) => <div className="capitalize">{row.getValue("name")}</div>,
   },
   {
-    accessorKey: "cpf",  // Coluna "CPF"
+    accessorKey: "cpf", // Coluna "CPF"
     header: ({ column }) => {
       return (
-        <Button
-          variant="ghost"
-          onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}
-        >
+        <Button variant="ghost" onClick={() => column.toggleSorting(column.getIsSorted() === "asc")}>
           CPF
           <ArrowUpDown />
         </Button>
@@ -111,19 +99,19 @@ export const columns: ColumnDef<Employee>[] = [
     cell: ({ row }) => <div className="lowercase">{row.getValue("cpf")}</div>,
   },
   {
-    accessorKey: "sector",  // Coluna "Setor"
+    accessorKey: "sector", // Coluna "Setor"
     header: () => <div className="text-right">Setor</div>,
     cell: ({ row }) => {
       return <div className="text-right font-medium">{row.getValue("sector")}</div>
     },
   },
   {
-    accessorKey: "gestor",  // Coluna "Gestor"
-    header: "Gestor",  // Título da coluna
-    cell: ({ row }) => <div className="capitalize">{row.getValue("gestor")}</div>,  // Exibindo o valor do gestor
+    accessorKey: "gestor", // Coluna "Gestor"
+    header: "Gestor", // Título da coluna
+    cell: ({ row }) => <div className="capitalize">{row.getValue("gestor")}</div>, // Exibindo o valor do gestor
   },
   {
-    id: "actions",  // Coluna de Ações (para ações extras como editar, excluir)
+    id: "actions", // Coluna de Ações (para ações extras como editar, excluir)
     enableHiding: false,
     cell: ({ row }) => {
       const employee = row.original
@@ -138,9 +126,7 @@ export const columns: ColumnDef<Employee>[] = [
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuLabel>Ações</DropdownMenuLabel>
-            <DropdownMenuItem
-              onClick={() => navigator.clipboard.writeText(employee.id)}
-            >
+            <DropdownMenuItem onClick={() => navigator.clipboard.writeText(employee.id.toString())}>
               Copiar ID do Usuário
             </DropdownMenuItem>
             <DropdownMenuSeparator />
@@ -153,7 +139,6 @@ export const columns: ColumnDef<Employee>[] = [
   },
 ]
 
-
 export default function DataTableDemo() {
   const [sorting, setSorting] = React.useState<SortingState>([])
   const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
@@ -161,7 +146,7 @@ export default function DataTableDemo() {
   const [rowSelection, setRowSelection] = React.useState({})
 
   // Estado para armazenar os dados da tabela
-  const [data, setData] = React.useState<Employee[]>([]) 
+  const [data, setData] = React.useState<Employee[]>([])
   const [loading, setLoading] = React.useState(true) // Estado de carregamento
   const [error, setError] = React.useState<string | null>(null) // Estado de erro
 
@@ -207,9 +192,7 @@ export default function DataTableDemo() {
         <Input
           placeholder="Pesquisar..."
           value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}
-          onChange={(event) =>
-            table.getColumn("name")?.setFilterValue(event.target.value)
-          }
+          onChange={(event) => table.getColumn("name")?.setFilterValue(event.target.value)}
           className="max-w-sm"
         />
         <DropdownMenu>
@@ -228,9 +211,7 @@ export default function DataTableDemo() {
                     key={column.id}
                     className="capitalize"
                     checked={column.getIsVisible()}
-                    onCheckedChange={(value) =>
-                      column.toggleVisibility(!!value)
-                    }
+                    onCheckedChange={(value) => column.toggleVisibility(!!value)}
                   >
                     {column.id}
                   </DropdownMenuCheckboxItem>
@@ -252,12 +233,7 @@ export default function DataTableDemo() {
                   {headerGroup.headers.map((header) => {
                     return (
                       <TableHead key={header.id}>
-                        {header.isPlaceholder
-                          ? null
-                          : flexRender(
-                              header.column.columnDef.header,
-                              header.getContext()
-                            )}
+                        {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
                       </TableHead>
                     )
                   })}
@@ -267,26 +243,15 @@ export default function DataTableDemo() {
             <TableBody>
               {table.getRowModel().rows?.length ? (
                 table.getRowModel().rows.map((row) => (
-                  <TableRow
-                    key={row.id}
-                    data-state={row.getIsSelected() && "selected"}
-                  >
+                  <TableRow key={row.id} data-state={row.getIsSelected() && "selected"}>
                     {row.getVisibleCells().map((cell) => (
-                      <TableCell key={cell.id}>
-                        {flexRender(
-                          cell.column.columnDef.cell,
-                          cell.getContext()
-                        )}
-                      </TableCell>
+                      <TableCell key={cell.id}>{flexRender(cell.column.columnDef.cell, cell.getContext())}</TableCell>
                     ))}
                   </TableRow>
                 ))
               ) : (
                 <TableRow>
-                  <TableCell
-                    colSpan={columns.length}
-                    className="h-24 text-center"
-                  >
+                  <TableCell colSpan={columns.length} className="h-24 text-center">
                     No results.
                   </TableCell>
                 </TableRow>
@@ -298,3 +263,4 @@ export default function DataTableDemo() {
     </div>
   )
 }
+
