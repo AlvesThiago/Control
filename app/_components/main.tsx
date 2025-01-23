@@ -90,6 +90,7 @@ export function Main() {
                   value={idcracha}
                   onChange={(e) => setIdcracha(e.target.value)} 
                   placeholder="Encoste o seu crachá"
+                  autoFocus
                 />
               </div>
               <div className="flex flex-col space-y-1.5">
