@@ -50,6 +50,33 @@ const HistoricoTable: React.FC = () => {
     return date.toLocaleDateString("pt-BR") // Formatar data para o formato brasileiro
   }
 
+  const exportToCSV = () => {
+    const header = ["Nome", "Setor", "Ação", "Data"]
+    const rows = filteredData.map(item => [
+      item.nome ?? "N/A",
+      item.setor ?? "N/A",
+      item.acao ?? "N/A",
+      formatDate(item.data),
+    ])
+
+    // Criando o conteúdo CSV
+    const csvContent = [
+      header.join(","), // Cabeçalho
+      ...rows.map(row => row.join(",")), // Linhas de dados
+    ].join("\n")
+
+    // Criando um link para download
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
+    const link = document.createElement("a")
+    const url = URL.createObjectURL(blob)
+    link.setAttribute("href", url)
+    link.setAttribute("download", "historico.csv")
+    link.style.visibility = "hidden"
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
+
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-2xl font-bold mb-4">Histórico</h1>
@@ -61,6 +88,14 @@ const HistoricoTable: React.FC = () => {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
+      </div>
+      <div className="mb-4">
+        <button
+          onClick={exportToCSV}
+          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+        >
+          Exportar para CSV
+        </button>
       </div>
       <div className="overflow-x-auto">
         <table className="min-w-full bg-white shadow-md rounded-lg overflow-hidden">
