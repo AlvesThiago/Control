@@ -17,7 +17,7 @@ function RegisterNote() {
   const [message, setMessage] = useState<string | null>(null)
   const [messageType, setMessageType] = useState<"success" | "error" | null>(null)
 
-  const setores = ["Granel", "Recebimento", "Volumoso", "Armazenagem", "Esteira", "Aéreo", "Retrabalho", "Expedição", "IS"]
+  const setores = ["Granel", "Recebimento", "Volumoso", "Armazenagem", "Esteira", "Aéreo", "Retrabalho", "Expedição", "IS", "ESTOQUE"]
   const statusOptions = ["Bom", "Validar", "Ruim"]
 
   const RegistroNotebook = async (serialNumber: string, modelo: string, setorNote: string, statusNote: string) => {

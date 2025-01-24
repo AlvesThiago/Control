@@ -187,8 +187,8 @@ export default function DataTableDemo() {
   })
 
   return (
-    <div className="w-full">
-      <div className="flex items-center py-4">
+    <div className="w-full overflow-auto max-h-[400px]">
+      <div className="flex items-center py-4 min-w-full">
         <Input
           placeholder="Pesquisar..."
           value={(table.getColumn("name")?.getFilterValue() as string) ?? ""}

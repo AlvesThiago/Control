@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import {  History, Home, Laptop, Settings2, Users } from "lucide-react"
+import {  History, Home, Laptop, Settings2, UserCog, Users } from "lucide-react"
 import { SidebarGroupLabel } from "@/components/ui/sidebar"
 import { Sidebar, SidebarContent, SidebarHeader, SidebarRail } from "@/components/ui/sidebar"
 import Link from "next/link"  // Importando Link do Next.js
@@ -15,14 +15,19 @@ const data = {
       icon: Home,
     },
     {
-      title: "Add User",
+      title: "Usuário",
       url: "/admin/management/add-user",  
       icon: Users,
     },
     {
-      title: "Add Notebook",
+      title: "Notebook",
       url: "/admin/management/add-notebook",  
       icon: Laptop,
+    },
+    {
+      title: "Gestores",
+      url: "/admin/management/gestor",  
+      icon: UserCog,
     },
     {
       title: "Associar",

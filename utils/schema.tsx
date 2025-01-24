@@ -42,3 +42,10 @@ export const NotebookStatus = pgTable('notebook_status', {
     isCheckedOut: boolean('is_checked_out').notNull().default(false),
     lastUpdated: timestamp('last_updated').defaultNow().notNull(),
 });
+
+export const Gestores = pgTable('gestores',{
+    id: serial('id').primaryKey(),
+    gestor: varchar('gestor').notNull(),
+    setorGestor: varchar('setor_gestor').notNull(),
+    cracha: varchar('cracha').notNull()
+})

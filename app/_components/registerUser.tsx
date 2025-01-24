@@ -7,6 +7,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { db } from "@/utils/db";
 import { Usuarios } from "@/utils/schema";
 import { useState } from "react";
@@ -20,6 +21,9 @@ function RegisterUser() {
     const [turno, setTurno] = useState("");
     const [message, setMessage] = useState<string | null>(null);
     const [messageType, setMessageType] = useState<"success" | "error" | null>(null);
+
+    const setores = ["Granel", "Recebimento", "Volumoso", "Armazenagem", "Esteira", "Aéreo", "Retrabalho", "Expedição", "IS"]
+
 
     const RegistrodeUsuarios = async (nome: string, idcracha: string, cpf: string, setor: string, gestor: string, turno: string) => {
         try {
@@ -106,12 +110,18 @@ function RegisterUser() {
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="setor">Setor</Label>
-                                <Input
-                                    id="setor"
-                                    placeholder="Digite o nome do setor"
-                                    value={setor}
-                                    onChange={(e) => setSetor(e.target.value)}
-                                />
+                                <Select value={setor} onValueChange={setSetor}>
+                                    <SelectTrigger id="setorNote">
+                                        <SelectValue placeholder="Selecione um setor" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {setores.map((setor) => (
+                                            <SelectItem key={setor} value={setor}>
+                                                {setor}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="gestor">Gestor</Label>
