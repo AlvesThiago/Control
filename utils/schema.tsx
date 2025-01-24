@@ -32,6 +32,9 @@ export const AtribuirNote = pgTable('atribuir', {
     nomet1: varchar('nomet1'),
     nomet2: varchar('nomet2'),
     nomet3: varchar('nomet3'),
+    nomet4: varchar('nomet4'),
+    nomet5: varchar('nomet5'),
+    nomet6: varchar('nomet6'),
     notebook: varchar('notebook').notNull()
 })
 
