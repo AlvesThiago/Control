@@ -26,7 +26,10 @@ export async function checkNotebookStatus(idcracha: string, serialNumber: string
 
   const usuarioAtribuido = atribuicao[0].nomet1 === usuario[0].nome ||
                            atribuicao[0].nomet2 === usuario[0].nome ||
-                           atribuicao[0].nomet3 === usuario[0].nome
+                           atribuicao[0].nomet3 === usuario[0].nome ||
+                           atribuicao[0].nomet4 === usuario[0].nome ||
+                           atribuicao[0].nomet5 === usuario[0].nome ||
+                           atribuicao[0].nomet6 === usuario[0].nome
 
   if (!usuarioAtribuido) {
     throw new Error('Este notebook não está atribuído a este usuário!')

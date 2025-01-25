@@ -20,6 +20,7 @@ function Atribuir() {
   const [assignments, setAssignments] = useState<Assignment[]>([])
   const [editingAssignment, setEditingAssignment] = useState<Assignment | null>(null)
   const [notification, setNotification] = useState<{ message: string; type: "success" | "error" } | null>(null)
+  const [searchTerm, setSearchTerm] = useState("")
 
   // Buscar as atribuições ao carregar a página
   useEffect(() => {
@@ -342,46 +343,57 @@ function Atribuir() {
           {/* Lista de Atribuições */}
           <div className="md:w-1/2 p-8 bg-gray-50 h-screen flex flex-col  border-b border-r border-t rounded-b-xl rounded-t-xl">
             <h2 className="text-2xl font-semibold text-gray-800 mb-4">Atribuições</h2>
+            <div className="mb-4">
+              <input
+                type="text"
+                placeholder="Buscar por setor..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full p-2 border rounded-md"
+              />
+            </div>
             <div className="overflow-y-auto flex-grow">
               {assignments.length === 0 ? (
                 <p className="text-gray-400 italic text-sm">Nenhuma atribuição feita ainda.</p>
               ) : (
                 <ul className="space-y-4">
-                  {assignments.map((assignment) => (
-                    <li key={assignment.id} className="bg-white p-4 rounded-lg shadow">
-                      <div className="flex justify-between items-start mb-2">
-                        <div>
-                          <h3 className="text-lg font-semibold text-gray-800">
-                            {assignment.notebook} - {assignment.setor}
-                          </h3>
-                          <ul className="mt-1">
-                            {assignment.users.map((user, index) => (
-                              <li key={index} className="text-gray-600">
-                                {user}
-                              </li>
-                            ))}
-                          </ul>
+                  {assignments
+                    .filter((assignment) => assignment.setor.toLowerCase().includes(searchTerm.toLowerCase()))
+                    .map((assignment) => (
+                      <li key={assignment.id} className="bg-white p-4 rounded-lg shadow">
+                        <div className="flex justify-between items-start mb-2">
+                          <div>
+                            <h3 className="text-lg font-semibold text-gray-800">
+                              {assignment.notebook} - {assignment.setor}
+                            </h3>
+                            <ul className="mt-1">
+                              {assignment.users.map((user, index) => (
+                                <li key={index} className="text-gray-600">
+                                  {user}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
+                          <div className="flex space-x-2">
+                            <button
+                              onClick={() => {
+                                setEditingAssignment(assignment)
+                                setUsers([...assignment.users, "", "", "", "", ""].slice(0, 6)) // Ensure six fields, filled or empty
+                              }}
+                              className="p-1 text-blue-500 hover:text-blue-600"
+                            >
+                              <Edit2 size={18} />
+                            </button>
+                            <button
+                              onClick={() => deleteAssignment(assignment.id)}
+                              className="p-1 text-red-500 hover:text-red-600"
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          </div>
                         </div>
-                        <div className="flex space-x-2">
-                          <button
-                            onClick={() => {
-                              setEditingAssignment(assignment)
-                              setUsers([...assignment.users, "", "", "", "", ""].slice(0, 6)) // Ensure six fields, filled or empty
-                            }}
-                            className="p-1 text-blue-500 hover:text-blue-600"
-                          >
-                            <Edit2 size={18} />
-                          </button>
-                          <button
-                            onClick={() => deleteAssignment(assignment.id)}
-                            className="p-1 text-red-500 hover:text-red-600"
-                          >
-                            <Trash2 size={18} />
-                          </button>
-                        </div>
-                      </div>
-                    </li>
-                  ))}
+                      </li>
+                    ))}
                 </ul>
               )}
             </div>
