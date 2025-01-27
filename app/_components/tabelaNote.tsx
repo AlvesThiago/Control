@@ -5,7 +5,6 @@ import {
   type ColumnDef,
   type ColumnFiltersState,
   type SortingState,
-  type VisibilityState,
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
@@ -13,12 +12,11 @@ import {
   getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
-import { ChevronDown, MoreHorizontal } from "lucide-react"
+import { ChevronDown, MoreHorizontal, Download } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Checkbox } from "@/components/ui/checkbox"
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
@@ -29,11 +27,10 @@ import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { db } from "@/utils/db"
 import { Notebooks } from "@/utils/schema"
-import { useState } from "react"
+import { useState, useMemo } from "react"
 import { UpdateNotebookModal } from "./update-notebook-modal"
 import { eq } from "drizzle-orm"
 
-// Definir o tipo para os dados do banco de dados (Notebooks)
 export type Notebook = {
   id: number
   serialNumber: string
@@ -42,7 +39,6 @@ export type Notebook = {
   statusNote: string | null
 }
 
-// Função para buscar os dados do banco de dados
 async function fetchListNotes(): Promise<Notebook[]> {
   const result = await db
     .select({
@@ -59,18 +55,16 @@ async function fetchListNotes(): Promise<Notebook[]> {
 }
 
 export default function DataTableNote() {
-  const [sorting, setSorting] = React.useState<SortingState>([])
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([])
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({})
-  const [rowSelection, setRowSelection] = React.useState({})
-
-  // Estado para armazenar os dados da tabela
-  const [data, setData] = React.useState<Notebook[]>([])
-  const [loading, setLoading] = React.useState(true) // Estado de carregamento
-  const [error, setError] = React.useState<string | null>(null) // Estado de erro
+  const [sorting, setSorting] = useState<SortingState>([])
+  const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([])
+  const [rowSelection, setRowSelection] = useState({})
+  const [globalFilter, setGlobalFilter] = useState("")
+  const [data, setData] = useState<Notebook[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
   const [selectedNotebook, setSelectedNotebook] = useState<Notebook | null>(null)
 
-  const columns = React.useMemo<ColumnDef<Notebook>[]>(
+  const columns = useMemo<ColumnDef<Notebook>[]>(
     () => [
       {
         id: "select",
@@ -138,7 +132,7 @@ export default function DataTableNote() {
         },
       },
     ],
-    [setSelectedNotebook],
+    [],
   )
 
   const handleUpdate = async (
@@ -147,32 +141,28 @@ export default function DataTableNote() {
   ) => {
     try {
       await db.update(Notebooks).set(updatedData).where(eq(Notebooks.id, id)).execute()
-
-      // After successful update, refresh the data
       const updatedNotebooks = await fetchListNotes()
       setData(updatedNotebooks)
     } catch (error) {
       console.error("Error updating notebook:", error)
-      // You might want to show an error message to the user here
     }
   }
 
-  // Fetch os dados do banco quando o componente é montado
   React.useEffect(() => {
     const fetchTableData = async () => {
       setLoading(true)
       try {
-        const result = await fetchListNotes() // Chama a função que busca os dados
-        setData(result) // Atualiza o estado com os dados recebidos
+        const notebooks = await fetchListNotes()
+        setData(notebooks)
       } catch (error) {
-        setError("Erro ao carregar dados.") // Caso ocorra erro
+        setError("Erro ao carregar dados.")
         console.error(error)
       } finally {
         setLoading(false)
       }
     }
     fetchTableData()
-  }, []) // Este efeito roda uma vez quando o componente for montado
+  }, [])
 
   const table = useReactTable({
     data,
@@ -183,49 +173,111 @@ export default function DataTableNote() {
     getPaginationRowModel: getPaginationRowModel(),
     getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
-    onColumnVisibilityChange: setColumnVisibility,
     onRowSelectionChange: setRowSelection,
+    onGlobalFilterChange: setGlobalFilter,
+    globalFilterFn: (row, columnId, filterValue) => {
+      const searchTerm = filterValue.toLowerCase()
+      const serialNumber = row.getValue("serialNumber") as string
+      const setorNote = row.getValue("setorNote") as string | null
+
+      return serialNumber.toLowerCase().includes(searchTerm) || (setorNote?.toLowerCase() || "").includes(searchTerm)
+    },
     state: {
       sorting,
       columnFilters,
-      columnVisibility,
       rowSelection,
+      globalFilter,
     },
   })
 
+  const uniqueSectors = useMemo(() => Array.from(new Set(data.map((notebook) => notebook.setorNote))), [data])
+  const uniqueStatuses = useMemo(() => Array.from(new Set(data.map((notebook) => notebook.statusNote))), [data])
+
+  const filteredRowsCount = table.getFilteredRowModel().rows.length
+
+  const exportToCSV = () => {
+    const filteredData = table.getFilteredRowModel().rows.map((row) => row.original)
+    const headers = columns
+      .filter((column) => column.id !== "select" && column.id !== "actions")
+      .map((column) => column.header as string)
+    const csvContent = [
+      headers.join(","),
+      ...filteredData.map((item) =>
+        headers.map((header) => JSON.stringify(item[header.toLowerCase() as keyof Notebook] || "")).join(","),
+      ),
+    ].join("\n")
+
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
+    const link = document.createElement("a")
+    if (link.download !== undefined) {
+      const url = URL.createObjectURL(blob)
+      link.setAttribute("href", url)
+      link.setAttribute("download", "notebooks_filtrados.csv")
+      link.style.visibility = "hidden"
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+    }
+  }
+
   return (
-    <div className="w-full overflow-auto max-h-[400px]">
-      <div className="flex items-center py-4 min-w-full">
-        <Input
-          placeholder="Pesquisar..."
-          value={(table.getColumn("serialNumber")?.getFilterValue() as string) ?? ""}
-          onChange={(event) => table.getColumn("serialNumber")?.setFilterValue(event.target.value)}
-          className="max-w-sm"
-        />
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" className="ml-auto">
-              Colunas <ChevronDown />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            {table
-              .getAllColumns()
-              .filter((column) => column.getCanHide())
-              .map((column) => {
-                return (
-                  <DropdownMenuCheckboxItem
-                    key={column.id}
-                    className="capitalize"
-                    checked={column.getIsVisible()}
-                    onCheckedChange={(value) => column.toggleVisibility(!!value)}
-                  >
-                    {column.id}
-                  </DropdownMenuCheckboxItem>
-                )
-              })}
-          </DropdownMenuContent>
-        </DropdownMenu>
+    <div className="w-full overflow-auto max-h-[600px]">
+      <div className="flex items-center justify-between space-x-4">
+        <div>
+          <h2 className="font-bold">Listar Equipamento</h2>
+        </div>
+        <div className="flex items-center gap-4">
+          <div className="text-sm font-bold">Total: {filteredRowsCount}</div>
+          <Button onClick={exportToCSV} variant="outline" className="bg-blue-400 text-white">
+            <Download className="mr-2 h-4 w-4" />
+            Exportar
+          </Button>
+        </div>
+
+      </div>
+      <div className="flex items-center justify-between space-x-2 py-4">
+        <div className="flex gap-4 items-center py-4 min-w-full">
+          <Input
+            placeholder="Pesquisar por Setor ou Número de Série..."
+            value={table.getState().globalFilter ?? ""}
+            onChange={(event) => table.setGlobalFilter(event.target.value)}
+            className="max-w-sm"
+          />
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">
+                Setor <ChevronDown className="ml-2 h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onClick={() => table.getColumn("setorNote")?.setFilterValue(null)}>
+                Todos os Setores
+              </DropdownMenuItem>
+              {uniqueSectors.map((sector) => (
+                <DropdownMenuItem key={sector} onClick={() => table.getColumn("setorNote")?.setFilterValue(sector)}>
+                  {sector}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline">
+                Status <ChevronDown className="ml-2 h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <DropdownMenuItem onClick={() => table.getColumn("statusNote")?.setFilterValue(null)}>
+                Todos os Status
+              </DropdownMenuItem>
+              {uniqueStatuses.map((status) => (
+                <DropdownMenuItem key={status} onClick={() => table.getColumn("statusNote")?.setFilterValue(status)}>
+                  {status}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </div>
       {loading ? (
         <div>Loading...</div>
@@ -237,13 +289,11 @@ export default function DataTableNote() {
             <TableHeader>
               {table.getHeaderGroups().map((headerGroup) => (
                 <TableRow key={headerGroup.id}>
-                  {headerGroup.headers.map((header) => {
-                    return (
-                      <TableHead key={header.id}>
-                        {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
-                      </TableHead>
-                    )
-                  })}
+                  {headerGroup.headers.map((header) => (
+                    <TableHead key={header.id}>
+                      {header.isPlaceholder ? null : flexRender(header.column.columnDef.header, header.getContext())}
+                    </TableHead>
+                  ))}
                 </TableRow>
               ))}
             </TableHeader>

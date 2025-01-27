@@ -21,10 +21,10 @@ async function fetchListHistorico() {
   }).from(Historico).execute()
 
   return result.map((item) => ({
-    nome: item.usuarios || null, 
-    setor: item.notebook || null, 
-    acao: item.tipo || null, 
-    data: item.createAt || null 
+    nome: item.usuarios || null,
+    setor: item.notebook || null,
+    acao: item.tipo || null,
+    data: item.createAt || null
   }))
 }
 
@@ -80,7 +80,7 @@ const HistoricoTable: React.FC = () => {
   return (
     <div className="container mx-auto p-6">
       <h1 className="text-2xl font-bold mb-4">Histórico</h1>
-      <div className="mb-4">
+      <div className="mb-4 flex gap-6">
         <input
           type="text"
           placeholder="Buscar por nome..."
@@ -88,13 +88,11 @@ const HistoricoTable: React.FC = () => {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-      </div>
-      <div className="mb-4">
         <button
           onClick={exportToCSV}
           className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
         >
-          Exportar para CSV
+          Exportar
         </button>
       </div>
       <div className="overflow-x-auto">

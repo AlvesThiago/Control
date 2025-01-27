@@ -19,6 +19,7 @@ function RegisterNote() {
 
   const setores = ["Granel", "Recebimento", "Volumoso", "Armazenagem", "Esteira", "Aéreo", "Retrabalho", "Expedição", "IS", "ESTOQUE"]
   const statusOptions = ["Bom", "Validar", "Ruim"]
+  const modeloEquipamento = ["I3", "I5", "I7", "Impressora"]
 
   const RegistroNotebook = async (serialNumber: string, modelo: string, setorNote: string, statusNote: string) => {
     try {
@@ -68,13 +69,13 @@ function RegisterNote() {
     <div className="container mx-auto py-6 px-4">
       <Card className="w-full max-w-4xl mx-auto">
         <CardHeader>
-          <CardTitle className="text-2xl mb-6">Cadastro de Notebook</CardTitle>
+          <CardTitle className="text-2xl mb-6">Cadastro de Equipamentos</CardTitle>
         </CardHeader>
         <CardContent className="mb-6">
           <form onSubmit={handleSubmit}>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="flex flex-col space-y-1.5">
-                <Label htmlFor="numbernote">Notebook</Label>
+                <Label htmlFor="numbernote">Serial Number</Label>
                 <Input
                   id="numbernote"
                   placeholder="S/N"
@@ -83,13 +84,19 @@ function RegisterNote() {
                 />
               </div>
               <div className="flex flex-col space-y-1.5">
-                <Label htmlFor="modeloNote">Modelo</Label>
-                <Input
-                  id="modeloNote"
-                  placeholder="Ex: I3, I5, I7 ..."
-                  value={modelo}
-                  onChange={(e) => setModelo(e.target.value)}
-                />
+                <Label htmlFor="modeloNote">Modelo do Equipamento</Label>
+                <Select value={modelo} onValueChange={setModelo}>
+                  <SelectTrigger id="setorNote">
+                    <SelectValue placeholder="Selecione o equipamento" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {modeloEquipamento.map((modeloEquipamento) => (
+                      <SelectItem key={modeloEquipamento} value={modeloEquipamento}>
+                        {modeloEquipamento}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div className="flex flex-col space-y-1.5">
                 <Label htmlFor="setorNote">Setor</Label>
