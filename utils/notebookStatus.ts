@@ -1,73 +1,111 @@
 import { db } from "@/utils/db"
-import { Usuarios, Notebooks, AtribuirNote, NotebookStatus, Historico } from "@/utils/schema"
-import { eq } from 'drizzle-orm';
+import { Usuarios, Notebooks, AtribuirNote, NotebookStatus, Historico, Gestores } from "@/utils/schema"
+import { eq } from "drizzle-orm"
+
+async function isManager(idcracha: string): Promise<boolean> {
+  const gestor = await db.select().from(Gestores).where(eq(Gestores.cracha, idcracha)).limit(1)
+  return gestor.length > 0
+}
+
+async function getManagerSector(idcracha: string): Promise<string | null> {
+  const gestor = await db.select().from(Gestores).where(eq(Gestores.cracha, idcracha)).limit(1)
+  return gestor.length > 0 ? gestor[0].setorGestor : null
+}
 
 export async function checkNotebookStatus(idcracha: string, serialNumber: string) {
-  // 1. Verifique se o usuário existe
-  const usuario = await db.select().from(Usuarios).where(eq(Usuarios.idcracha, idcracha)).limit(1)
-  if (usuario.length === 0) {
-    throw new Error('Usuário não encontrado!')
-  }
+  // 1. Verifique se o usuário é um gestor
+  const isUserManager = await isManager(idcracha)
+  const managerSector = isUserManager ? await getManagerSector(idcracha) : null
 
   // 2. Verifique se o notebook existe
   const notebook = await db.select().from(Notebooks).where(eq(Notebooks.serialNumber, serialNumber)).limit(1)
   if (notebook.length === 0) {
-    throw new Error('Notebook não encontrado!')
+    throw new Error("Notebook não encontrado!")
   }
 
-  // 3. Verifique se o notebook está atribuído ao usuário correto
-  const atribuicao = await db.select().from(AtribuirNote)
-    .where(eq(AtribuirNote.notebook, serialNumber))
-    .limit(1)
+  let usuario
 
-  if (atribuicao.length === 0) {
-    throw new Error('Este notebook não está atribuído a nenhum usuário!')
-  }
+  if (isUserManager) {
+    // Se for um gestor, verifique se o setor do gestor corresponde ao setor do notebook
+    if (notebook[0].setorNote !== managerSector) {
+      throw new Error("Este notebook não pertence ao seu setor!")
+    }
+    // Busque as informações do gestor
+    const gestor = await db.select().from(Gestores).where(eq(Gestores.cracha, idcracha)).limit(1)
+    if (gestor.length === 0) {
+      throw new Error("Gestor não encontrado!")
+    }
+    usuario = { nome: gestor[0].gestor, idcracha: gestor[0].cracha }
+  } else {
+    // Se não for um gestor, verifique se o usuário existe
+    const usuarioResult = await db.select().from(Usuarios).where(eq(Usuarios.idcracha, idcracha)).limit(1)
+    if (usuarioResult.length === 0) {
+      throw new Error("Usuário não encontrado!")
+    }
+    usuario = usuarioResult[0]
 
-  const usuarioAtribuido = atribuicao[0].nomet1 === usuario[0].nome ||
-                           atribuicao[0].nomet2 === usuario[0].nome ||
-                           atribuicao[0].nomet3 === usuario[0].nome ||
-                           atribuicao[0].nomet4 === usuario[0].nome ||
-                           atribuicao[0].nomet5 === usuario[0].nome ||
-                           atribuicao[0].nomet6 === usuario[0].nome
+    // Verifique se o notebook está atribuído ao usuário correto
+    const atribuicao = await db.select().from(AtribuirNote).where(eq(AtribuirNote.notebook, serialNumber)).limit(1)
 
-  if (!usuarioAtribuido) {
-    throw new Error('Este notebook não está atribuído a este usuário!')
+    if (atribuicao.length === 0) {
+      throw new Error("Este notebook não está atribuído a nenhum usuário!")
+    }
+
+    const usuarioAtribuido =
+      atribuicao[0].nomet1 === usuario.nome ||
+      atribuicao[0].nomet2 === usuario.nome ||
+      atribuicao[0].nomet3 === usuario.nome ||
+      atribuicao[0].nomet4 === usuario.nome ||
+      atribuicao[0].nomet5 === usuario.nome ||
+      atribuicao[0].nomet6 === usuario.nome
+
+    if (!usuarioAtribuido) {
+      throw new Error("Este notebook não está atribuído a este usuário!")
+    }
   }
 
   // 4. Verifique o status atual do notebook
-  let status = await db.select().from(NotebookStatus)
+  let status = await db
+    .select()
+    .from(NotebookStatus)
     .where(eq(NotebookStatus.notebookId, notebook[0].serialNumber))
     .limit(1)
 
   if (status.length === 0) {
     // Se não existir um status, crie um
     await db.insert(NotebookStatus).values({
-      notebookId: notebook[0].serialNumber,  // notebookId é obrigatório
-      isCheckedOut: false,  // isCheckedOut é passado corretamente
-      userId: null,  // Como o notebook não está "checked out", o userId pode ser nulo
-      lastUpdated: new Date()  // Defina o lastUpdated com a data atual
+      notebookId: notebook[0].serialNumber,
+      isCheckedOut: false,
+      userId: null,
+      lastUpdated: new Date(),
     })
-    status = [{
-      isCheckedOut: false, notebookId: notebook[0].serialNumber, userId: null, lastUpdated: new Date(),
-      id: 0
-    }]
+    status = [
+      {
+        isCheckedOut: false,
+        notebookId: notebook[0].serialNumber,
+        userId: null,
+        lastUpdated: new Date(),
+        id: 0,
+      },
+    ]
   }
 
   return {
-    usuario: usuario[0],
+    usuario,
     notebook: notebook[0],
-    isCheckedOut: status[0].isCheckedOut
+    isCheckedOut: status[0].isCheckedOut,
+    isManager: isUserManager,
   }
 }
 
 export async function updateNotebookStatus(usuario: string, notebook: string, isCheckedOut: boolean) {
   // Atualiza o status do notebook
-  await db.update(NotebookStatus)
-    .set({ 
-      isCheckedOut: isCheckedOut, 
-      userId: isCheckedOut ? usuario : null,  // Se estiver "checked out", atribua o usuario, senão null
-      lastUpdated: new Date()  // Sempre atualize o campo lastUpdated
+  await db
+    .update(NotebookStatus)
+    .set({
+      isCheckedOut: isCheckedOut,
+      userId: isCheckedOut ? usuario : null,
+      lastUpdated: new Date(),
     })
     .where(eq(NotebookStatus.notebookId, notebook))
 
@@ -75,7 +113,8 @@ export async function updateNotebookStatus(usuario: string, notebook: string, is
   await db.insert(Historico).values({
     usuarios: usuario,
     notebook: notebook,
-    tipo: isCheckedOut ? 'Retirada' : 'Devolução',
+    tipo: isCheckedOut ? "Retirada" : "Devolução",
     createdAt: new Date(),
   })
 }
+
