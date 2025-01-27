@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { useEffect, useCallback } from "react"
+import { useEffect, useCallback, useRef } from "react"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
@@ -19,6 +19,10 @@ export function Main() {
     message: string
     type: "success" | "error"
   } | null>(null)
+
+  const idcrachaRef = useRef<HTMLInputElement>(null)
+  const serialNumberRef = useRef<HTMLInputElement>(null)
+  const buttonRef = useRef<HTMLButtonElement>(null)
 
   const handleAction = async () => {
     setLoading(true)
@@ -74,6 +78,20 @@ export function Main() {
     }
   }, [clearNotification, notification])
 
+  useEffect(() => {
+    if (idcracha) {
+      // Quando o crachá for preenchido, ir automaticamente para o campo "Notebook"
+      serialNumberRef.current?.focus()
+    }
+  }, [idcracha])
+
+  useEffect(() => {
+    if (serialNumber) {
+      // Quando o serialNumber for preenchido, ir automaticamente para o botão "Verificar"
+      buttonRef.current?.focus()
+    }
+  }, [serialNumber])
+
   return (
     <div className='flex items-center justify-center min-h-screen bg-[url("/Fundo.svg")] bg-cover bg-center'>
       <Card className="w-[800px] flex flex-col justify-center">
@@ -85,13 +103,14 @@ export function Main() {
         </CardHeader>
         <CardContent className="mb-20">
           <form onSubmit={(e) => e.preventDefault()}>
-            <div className="grid w-full items-center gap-4 ">
-              <div className="flex flex-col space-y-1.5 ">
+            <div className="grid w-full items-center gap-4">
+              <div className="flex flex-col space-y-1.5">
                 <Label htmlFor="idcracha" className="font-bold">
                   Crachá
                 </Label>
                 <Input
                   id="idcracha"
+                  ref={idcrachaRef}
                   value={idcracha}
                   onChange={(e) => setIdcracha(e.target.value)}
                   placeholder="Encoste o seu crachá"
@@ -104,6 +123,7 @@ export function Main() {
                 </Label>
                 <Input
                   id="serialNumber"
+                  ref={serialNumberRef}
                   value={serialNumber}
                   onChange={(e) => setSerialNumber(e.target.value)}
                   placeholder="Bipe o QRcode"
@@ -115,17 +135,12 @@ export function Main() {
             <Notification key={notification.id} message={notification.message} type={notification.type} />
           )}
         </CardContent>
-        <CardFooter className="flex justify-between">
+        <CardFooter className="flex justify-end">
           <Button
-            variant="outline"
-            onClick={() => {
-              setIdcracha("")
-              setSerialNumber("")
-            }}
+            ref={buttonRef}
+            onClick={handleAction}
+            disabled={loading || !idcracha || !serialNumber}
           >
-            Cancelar
-          </Button>
-          <Button onClick={handleAction} disabled={loading || !idcracha || !serialNumber}>
             {loading ? "Processando..." : "Verificar"}
           </Button>
         </CardFooter>
@@ -133,4 +148,3 @@ export function Main() {
     </div>
   )
 }
-

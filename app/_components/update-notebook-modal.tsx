@@ -35,7 +35,7 @@ export function UpdateNotebookModal({ notebook, isOpen, onClose, onUpdate }: Upd
   const [setorNote, setSetorNote] = useState(notebook.setorNote || "")
   const [statusNote, setStatusNote] = useState(notebook.statusNote || "")
 
-  const setores = ["Granel", "Recebimento", "Volumoso", "Armazenagem", "Esteira", "Aéreo", "Retrabalho", "Expedição", "IS"]
+  const setores = ["Granel", "Recebimento", "Volumoso", "Armazenagem", "Esteira", "Aéreo", "Retrabalho", "Expedição", "IS", "Estoque"]
   const statusOptions = ["Bom", "Validar", "Ruim"]
 
   useEffect(() => {

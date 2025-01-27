@@ -23,6 +23,7 @@ function RegisterUser() {
     const [messageType, setMessageType] = useState<"success" | "error" | null>(null);
 
     const setores = ["Granel", "Recebimento", "Volumoso", "Armazenagem", "Esteira", "Aéreo", "Retrabalho", "Expedição", "IS"]
+    const turnos = ["T1", "T2", "T3"]
 
 
     const RegistrodeUsuarios = async (nome: string, idcracha: string, cpf: string, setor: string, gestor: string, turno: string) => {
@@ -134,12 +135,18 @@ function RegisterUser() {
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="turno">Turno</Label>
-                                <Input
-                                    id="turno"
-                                    placeholder="Digite o seu turno"
-                                    value={turno}
-                                    onChange={(e) => setTurno(e.target.value)}
-                                />
+                                <Select value={turno} onValueChange={setTurno}>
+                                    <SelectTrigger id="setorNote">
+                                        <SelectValue placeholder="Selecione um turno" />
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {turnos.map((turnos) => (
+                                            <SelectItem key={setor} value={turnos}>
+                                                {turnos}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
                             </div>
                         </div>
                         <div className="flex justify-end">
@@ -149,11 +156,10 @@ function RegisterUser() {
 
                     {message && (
                         <div
-                            className={`mt-4 text-center p-2 rounded-md ${
-                                messageType === "success"
+                            className={`mt-4 text-center p-2 rounded-md ${messageType === "success"
                                     ? "bg-green-500 text-white"
                                     : "bg-red-500 text-white"
-                            }`}
+                                }`}
                         >
                             {message}
                         </div>

@@ -47,7 +47,15 @@ const HistoricoTable: React.FC = () => {
 
   const formatDate = (date: Date | null) => {
     if (!date) return ""
-    return date.toLocaleDateString("pt-BR") // Formatar data para o formato brasileiro
+    // Formata a data e hora no formato brasileiro
+    return date.toLocaleString("pt-BR", {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+    })
   }
 
   const exportToCSV = () => {

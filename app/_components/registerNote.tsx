@@ -17,7 +17,7 @@ function RegisterNote() {
   const [message, setMessage] = useState<string | null>(null)
   const [messageType, setMessageType] = useState<"success" | "error" | null>(null)
 
-  const setores = ["Granel", "Recebimento", "Volumoso", "Armazenagem", "Esteira", "Aéreo", "Retrabalho", "Expedição", "IS", "ESTOQUE"]
+  const setores = ["Granel", "Recebimento", "Volumoso", "Armazenagem", "Esteira", "Aéreo", "Retrabalho", "Expedição", "IS", "Estoque"]
   const statusOptions = ["Bom", "Validar", "Ruim"]
   const modeloEquipamento = ["I3", "I5", "I7", "Impressora"]
 
