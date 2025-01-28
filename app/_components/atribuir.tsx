@@ -252,8 +252,8 @@ function Atribuir() {
           {/* Formulário de Atribuição */}
           <div className="md:w-1/2 p-8 border-b border-l border-t rounded-b-xl rounded-t-xl">
             <div className="uppercase tracking-wide text-sm  font-semibold mb-1">Sistema de Atribuição</div>
-            <h1 className="block mt-1 text-2xl leading-tight font-medium text-black">Notebook e Usuários</h1>
-            <p className="mt-2 text-gray-500 text-sm">Atribua até 6 usuários a um notebook.</p>
+            <h1 className="block mt-1 text-2xl leading-tight font-medium text-black">Equipamento e Usuários</h1>
+            <p className="mt-2 text-gray-500 text-sm">Atribua até 6 usuários a um equipamento.</p>
 
             <div className="my-6">
               <div className="flex items-center border-b border-b-gray-300 py-1">
@@ -261,7 +261,7 @@ function Atribuir() {
                 <input
                   className="appearance-none bg-transparent border-none w-full text-gray-700 mr-3 py-1 px-2 leading-tight focus:outline-none"
                   type="text"
-                  placeholder="Serial do Notebook"
+                  placeholder="Serial do Equipamento"
                   value={notebook}
                   onChange={(e) => setNotebook(e.target.value)}
                 />
