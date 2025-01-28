@@ -1,12 +1,9 @@
 'use client'
 import { Button } from "@/components/ui/button";
-import DataTableDemo from "@/app/_components/tabelaUser";
 import RegisterUser from "@/app/_components/registerUser";
-import { useState } from "react";
+import Link from "next/link";
 
 export default function AddUserPage() {
-
-    const [showRegister, setShowRegister] = useState(true);
 
     return (
         <>
@@ -14,23 +11,14 @@ export default function AddUserPage() {
                 <div className="flex justify-around items-center p-6">
                     <h2 className="text-3xl font-light">Control</h2>
                     <div className="flex gap-2">
-                        <Button onClick={() => setShowRegister(true)}>Add User</Button>
-                        <Button onClick={() => setShowRegister(false)}>Listar Users</Button>
+                        <Link href={'/admin/management/add-user/list-user'}>
+                            <Button >Listar usuários</Button>
+                        </Link>
                     </div>
                 </div>
             </div>
+            <RegisterUser />
 
-            {showRegister? (
-                <RegisterUser/>
-            ) : (
-                <div className="mx-auto h-[470px] w-full max-w-3xl rounded-xl bg-muted/50">
-                    <div className="flex flex-col items-center justify-center p-6">
-                        <DataTableDemo/>
-                    </div>
-                </div>
-            )}
- 
         </>
     );
-  }
-  
+}

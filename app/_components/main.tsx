@@ -47,6 +47,9 @@ export function Main() {
       // Limpar os campos após a ação bem-sucedida
       setIdcracha("")
       setSerialNumber("")
+
+      // Voltar o foco para o input de crachá
+      idcrachaRef.current?.focus()
     } catch (error) {
       if (error instanceof Error) {
         setNotification({
@@ -79,21 +82,28 @@ export function Main() {
   }, [clearNotification, notification])
 
   useEffect(() => {
-    if (idcracha) {
-      // Quando o crachá for preenchido, ir automaticamente para o campo "Notebook"
-      serialNumberRef.current?.focus()
+    if (idcracha.length > 6) {
+      serialNumberRef.current?.focus() // Foca no campo de serialNumber assim que idcracha estiver preenchido
     }
   }, [idcracha])
 
   useEffect(() => {
-    if (serialNumber) {
-      // Quando o serialNumber for preenchido, ir automaticamente para o botão "Verificar"
-      buttonRef.current?.focus()
+    if (serialNumber.length > 6) {
+      // Simula o clique no botão "Verificar" quando o serialNumber estiver preenchido
+      buttonRef.current?.click()
     }
   }, [serialNumber])
 
+  const handleCardInput = (event: React.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.id === "idcracha") {
+      setIdcracha(event.target.value)
+    } else if (event.target.id === "serialNumber") {
+      setSerialNumber(event.target.value)
+    }
+  }
+
   return (
-    <div className='flex items-center justify-center min-h-screen bg-[url("/Fundo.svg")] bg-cover bg-center'>
+    <div className="flex items-center justify-center min-h-screen bg-[url('/Fundo.svg')] bg-cover bg-center">
       <Card className="w-[800px] flex flex-col justify-center">
         <CardHeader className="mt-8 mb-12">
           <div className="flex justify-center items-center mb-1">
@@ -112,7 +122,7 @@ export function Main() {
                   id="idcracha"
                   ref={idcrachaRef}
                   value={idcracha}
-                  onChange={(e) => setIdcracha(e.target.value)}
+                  onChange={handleCardInput}
                   placeholder="Encoste o seu crachá"
                   autoFocus
                 />
@@ -125,8 +135,9 @@ export function Main() {
                   id="serialNumber"
                   ref={serialNumberRef}
                   value={serialNumber}
-                  onChange={(e) => setSerialNumber(e.target.value)}
+                  onChange={handleCardInput}
                   placeholder="Bipe o QRcode"
+                  disabled={idcracha.length === 0} // Desabilita até que o crachá esteja preenchido
                 />
               </div>
             </div>

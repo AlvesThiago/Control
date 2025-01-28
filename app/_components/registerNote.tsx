@@ -39,6 +39,16 @@ function RegisterNote() {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
 
+    if (!serialNumber || !modelo || !setorNote || !statusNote) {
+      setMessage("Por favor, preencha todos os campos.")
+      setMessageType("error")
+      setTimeout(() => {
+        setMessage(null)
+        setMessageType(null)
+      }, 3000)
+      return
+    }
+
     RegistroNotebook(serialNumber, modelo, setorNote, statusNote)
       .then(() => {
         setMessage("Notebook cadastrado com sucesso!")
@@ -64,6 +74,9 @@ function RegisterNote() {
         }, 3000)
       })
   }
+
+  // Verifica se o formulário está completo
+  const isFormValid = serialNumber && modelo && setorNote && statusNote
 
   return (
     <div className="container mx-auto py-6 px-4">
@@ -130,7 +143,7 @@ function RegisterNote() {
               </div>
             </div>
             <div className="flex justify-end mt-8">
-              <Button type="submit">Cadastrar Notebook</Button>
+              <Button type="submit" disabled={!isFormValid}>Cadastrar Notebook</Button>
             </div>
           </form>
 
@@ -150,4 +163,3 @@ function RegisterNote() {
 }
 
 export default RegisterNote
-

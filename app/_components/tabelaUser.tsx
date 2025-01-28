@@ -187,7 +187,7 @@ export default function DataTableDemo() {
   })
 
   return (
-    <div className="w-full overflow-auto max-h-[400px]">
+    <div className="w-full overflow-auto max-h-[600px]">
       <div className="flex items-center py-4 min-w-full">
         <Input
           placeholder="Pesquisar..."
@@ -263,4 +263,3 @@ export default function DataTableDemo() {
     </div>
   )
 }
-

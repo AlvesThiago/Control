@@ -22,9 +22,8 @@ function RegisterUser() {
     const [message, setMessage] = useState<string | null>(null);
     const [messageType, setMessageType] = useState<"success" | "error" | null>(null);
 
-    const setores = ["Granel", "Recebimento", "Volumoso", "Armazenagem", "Esteira", "Aéreo", "Retrabalho", "Expedição", "IS"]
-    const turnos = ["T1", "T2", "T3"]
-
+    const setores = ["Granel", "Recebimento", "Volumoso", "Armazenagem", "Esteira", "Aéreo", "Retrabalho", "Expedição", "IS"];
+    const turnos = ["T1", "T2", "T3"];
 
     const RegistrodeUsuarios = async (nome: string, idcracha: string, cpf: string, setor: string, gestor: string, turno: string) => {
         try {
@@ -45,6 +44,17 @@ function RegisterUser() {
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
+
+        // Validação: verificar se todos os campos estão preenchidos
+        if (!nome || !idCracha || !cpf || !setor || !gestor || !turno) {
+            setMessage("Por favor, preencha todos os campos.");
+            setMessageType("error");
+            setTimeout(() => {
+                setMessage(null);
+                setMessageType(null);
+            }, 3000);
+            return;
+        }
 
         RegistrodeUsuarios(nome, idCracha, cpf, setor, gestor, turno)
             .then(() => {
@@ -141,7 +151,7 @@ function RegisterUser() {
                                     </SelectTrigger>
                                     <SelectContent>
                                         {turnos.map((turnos) => (
-                                            <SelectItem key={setor} value={turnos}>
+                                            <SelectItem key={turnos} value={turnos}>
                                                 {turnos}
                                             </SelectItem>
                                         ))}
@@ -171,4 +181,3 @@ function RegisterUser() {
 }
 
 export default RegisterUser;
-

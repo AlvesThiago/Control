@@ -8,8 +8,6 @@ import {
   flexRender,
   getCoreRowModel,
   getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
   useReactTable,
 } from "@tanstack/react-table"
 import { ChevronDown, MoreHorizontal, Download } from "lucide-react"
@@ -64,76 +62,73 @@ export default function DataTableNote() {
   const [error, setError] = useState<string | null>(null)
   const [selectedNotebook, setSelectedNotebook] = useState<Notebook | null>(null)
 
-  const columns = useMemo<ColumnDef<Notebook>[]>(
-    () => [
-      {
-        id: "select",
-        header: ({ table }) => (
-          <Checkbox
-            checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
-            onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
-            aria-label="Select all"
-          />
-        ),
-        cell: ({ row }) => (
-          <Checkbox
-            checked={row.getIsSelected()}
-            onCheckedChange={(value) => row.toggleSelected(!!value)}
-            aria-label="Select row"
-          />
-        ),
-        enableSorting: false,
-        enableHiding: false,
+  const columns = useMemo<ColumnDef<Notebook>[]>(() => [
+    {
+      id: "select",
+      header: ({ table }) => (
+        <Checkbox
+          checked={table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && "indeterminate")}
+          onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+          aria-label="Select all"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={row.getIsSelected()}
+          onCheckedChange={(value) => row.toggleSelected(!!value)}
+          aria-label="Select row"
+        />
+      ),
+      enableSorting: false,
+      enableHiding: false,
+    },
+    {
+      accessorKey: "serialNumber",
+      header: "Número de Série",
+      cell: ({ row }) => <div className="capitalize">{row.getValue("serialNumber")}</div>,
+    },
+    {
+      accessorKey: "modelo",
+      header: "Modelo",
+      cell: ({ row }) => <div className="capitalize">{row.getValue("modelo")}</div>,
+    },
+    {
+      accessorKey: "setorNote",
+      header: "Setor",
+      cell: ({ row }) => <div className="capitalize">{row.getValue("setorNote")}</div>,
+    },
+    {
+      accessorKey: "statusNote",
+      header: "Status",
+      cell: ({ row }) => <div className="capitalize">{row.getValue("statusNote")}</div>,
+    },
+    {
+      id: "actions",
+      enableHiding: false,
+      cell: ({ row }) => {
+        const notebook = row.original
+        return (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="ghost" className="h-8 w-8 p-0">
+                <span className="sr-only">Open menu</span>
+                <MoreHorizontal className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuLabel>Ações</DropdownMenuLabel>
+              <DropdownMenuItem onClick={() => navigator.clipboard.writeText(notebook.id.toString())}>
+                Copiar ID
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem onClick={() => setSelectedNotebook(notebook)}>Atualizar</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleDelete(notebook.id)}>Excluir</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )
       },
-      {
-        accessorKey: "serialNumber",
-        header: "Número de Série",
-        cell: ({ row }) => <div className="capitalize">{row.getValue("serialNumber")}</div>,
-      },
-      {
-        accessorKey: "modelo",
-        header: "Modelo",
-        cell: ({ row }) => <div className="capitalize">{row.getValue("modelo")}</div>,
-      },
-      {
-        accessorKey: "setorNote",
-        header: "Setor",
-        cell: ({ row }) => <div className="capitalize">{row.getValue("setorNote")}</div>,
-      },
-      {
-        accessorKey: "statusNote",
-        header: "Status",
-        cell: ({ row }) => <div className="capitalize">{row.getValue("statusNote")}</div>,
-      },
-      {
-        id: "actions",
-        enableHiding: false,
-        cell: ({ row }) => {
-          const notebook = row.original
-          return (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" className="h-8 w-8 p-0">
-                  <span className="sr-only">Open menu</span>
-                  <MoreHorizontal className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>Ações</DropdownMenuLabel>
-                <DropdownMenuItem onClick={() => navigator.clipboard.writeText(notebook.id.toString())}>
-                  Copiar ID
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => setSelectedNotebook(notebook)}>Atualizar</DropdownMenuItem>
-                <DropdownMenuItem>Excluir</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )
-        },
-      },
-    ],
-    [],
-  )
+    },
+  ], [])
 
   const handleUpdate = async (
     id: number,
@@ -145,6 +140,21 @@ export default function DataTableNote() {
       setData(updatedNotebooks)
     } catch (error) {
       console.error("Error updating notebook:", error)
+    }
+  }
+
+  const handleDelete = async (id: number) => {
+    if (window.confirm("Tem certeza que deseja excluir este notebook?")) {
+      try {
+        // Excluir o notebook da base de dados
+        await db.delete(Notebooks).where(eq(Notebooks.id, id)).execute()
+        // Atualizar os dados da tabela
+        const updatedNotebooks = await fetchListNotes()
+        setData(updatedNotebooks)
+      } catch (error) {
+        console.error("Error deleting notebook:", error)
+        setError("Erro ao excluir o notebook.")
+      }
     }
   }
 
@@ -170,8 +180,6 @@ export default function DataTableNote() {
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     getCoreRowModel: getCoreRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
-    getSortedRowModel: getSortedRowModel(),
     getFilteredRowModel: getFilteredRowModel(),
     onRowSelectionChange: setRowSelection,
     onGlobalFilterChange: setGlobalFilter,
@@ -233,7 +241,6 @@ export default function DataTableNote() {
             Exportar
           </Button>
         </div>
-
       </div>
       <div className="flex items-center justify-between space-x-2 py-4">
         <div className="flex gap-4 items-center py-4 min-w-full">
@@ -328,4 +335,3 @@ export default function DataTableNote() {
     </div>
   )
 }
-
