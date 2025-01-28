@@ -1,7 +1,10 @@
-import Component from "@/app/_components/dashboard";
+
+import TesteDash from "@/app/_components/testeDash";
 
 export default function Dashboard(){
   return(
-    <Component />
+
+    <TesteDash />
+    // <Component />
   );
 }
