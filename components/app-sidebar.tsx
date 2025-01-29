@@ -20,7 +20,7 @@ const data = {
       icon: Users,
     },
     {
-      title: "Notebook",
+      title: "Equipamentos",
       url: "/admin/management/add-notebook",  
       icon: Laptop,
     },

@@ -50,50 +50,57 @@ const Dashboard = () => {
   };
 
   return (
-    <div className="p-6 space-y-6">
-      <h1 className="text-2xl font-bold">Dashboard de Equipamentos</h1>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <Card>
+    <div className="p-4 md:p-6 space-y-6">
+      <h1 className="text-xl md:text-md font-bold text-center md:text-left">Dashboard de Equipamentos</h1>
+
+      {/* Cards de Informações */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle>Total de Equipamentos</CardTitle>
+            <CardTitle className="text-lg md:text-md">Total de Equipamentos</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">{dados.totalEquipamentos}</p>
+            <p className="text-2xl md:text-md font-bold">{dados.totalEquipamentos}</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle>Equipamentos em Uso</CardTitle>
+            <CardTitle className="text-lg md:text-md">Equipamentos em Uso</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">{dados.equipamentosEmUso}</p>
+            <p className="text-2xl md:text-md font-bold">{dados.equipamentosEmUso}</p>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle>Equipamentos em Estoque</CardTitle>
+            <CardTitle className="text-lg md:text-md">Equipamentos em Estoque</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-3xl font-bold">{dados.equipamentosEmEstoque}</p>
+            <p className="text-2xl md:text-md font-bold">{dados.equipamentosEmEstoque}</p>
           </CardContent>
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <Card>
+      {/* Gráficos */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle>Visão Geral</CardTitle>
+            <CardTitle className="text-lg md:text-xl">Visão Geral</CardTitle>
           </CardHeader>
-          <CardContent>
-            <Bar data={barData} />
+          <CardContent className="w-full">
+            <div className="h-64 md:h-80">
+              <Bar data={barData} />
+            </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card className="shadow-lg">
           <CardHeader>
-            <CardTitle>Distribuição de Equipamentos</CardTitle>
+            <CardTitle className="text-lg md:text-xl">Distribuição de Equipamentos</CardTitle>
           </CardHeader>
-          <CardContent className="w-[400px] h-[400px] flex justify-center items-center mx-auto">
-            <Pie data={pieData} />
+          <CardContent className="flex justify-center items-center">
+            <div className="w-48 h-48 md:w-64 md:h-64">
+              <Pie data={pieData} />
+            </div>
           </CardContent>
         </Card>
       </div>
