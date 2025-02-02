@@ -45,11 +45,12 @@ export async function GET() {
         statusNote: Notebooks.statusNote,
       })
       .from(Notebooks)
-      .execute();
+      .execute()
 
-    return NextResponse.json(notebooks);
+    return NextResponse.json(notebooks)
   } catch (error) {
-    return NextResponse.json({ error: "Erro ao buscar notebooks" }, { status: 500 });
+    console.error(error)
+    return NextResponse.json({ error: "Erro ao buscar notebooks" }, { status: 500 })
   }
 }
 
@@ -65,6 +66,7 @@ export async function PUT(request: Request) {
 
     return NextResponse.json({ message: "Notebook atualizado com sucesso" })
   } catch (error) {
+    console.error(error)
     return NextResponse.json({ error: "Erro ao atualizar notebook" }, { status: 500 })
   }
 }
@@ -85,6 +87,7 @@ export async function DELETE(request: Request) {
 
     return NextResponse.json({ message: "Notebook excluído com sucesso" })
   } catch (error) {
+    console.error(error)
     return NextResponse.json({ error: "Erro ao excluir notebook" }, { status: 500 })
   }
 }

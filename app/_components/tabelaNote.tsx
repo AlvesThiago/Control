@@ -26,6 +26,7 @@ import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useState, useMemo, useCallback } from "react"
 import { UpdateNotebookModal } from "./update-notebook-modal"
+import { useRouter } from "next/navigation"
 
 export type Notebook = {
   id: number
@@ -55,6 +56,22 @@ export default function DataTableNote() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedNotebook, setSelectedNotebook] = useState<Notebook | null>(null)
+  const router = useRouter()
+
+  const handleDelete = useCallback(async (id: number) => {
+    if (window.confirm("Tem certeza que deseja excluir este notebook?")) {
+      try {
+        const response = await fetch(`/api/notebooks?id=${id}`, {
+          method: "DELETE",
+        })
+        if (!response.ok) throw new Error("Erro ao excluir notebook")
+        await fetchTableData()
+      } catch (error) {
+        console.error("Error deleting notebook:", error)
+        setError("Erro ao excluir o notebook.")
+      }
+    }
+  }, [])
 
   const columns = useMemo<ColumnDef<Notebook>[]>(
     () => [
@@ -116,7 +133,9 @@ export default function DataTableNote() {
                   Copiar ID
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => setSelectedNotebook(notebook)}>Atualizar</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push(`/notebooks/${notebook.id}/edit`)}>
+                  Editar
+                </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => handleDelete(notebook.id)}>Excluir</DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
@@ -124,7 +143,7 @@ export default function DataTableNote() {
         },
       },
     ],
-    [],
+    [handleDelete, router],
   )
 
   const handleUpdate = async (
@@ -144,21 +163,6 @@ export default function DataTableNote() {
     } catch (error) {
       console.error("Error updating notebook:", error)
       setError("Erro ao atualizar o notebook.")
-    }
-  }
-
-  const handleDelete = async (id: number) => {
-    if (window.confirm("Tem certeza que deseja excluir este notebook?")) {
-      try {
-        const response = await fetch(`/api/notebooks?id=${id}`, {
-          method: "DELETE",
-        })
-        if (!response.ok) throw new Error("Erro ao excluir notebook")
-        await fetchTableData()
-      } catch (error) {
-        console.error("Error deleting notebook:", error)
-        setError("Erro ao excluir o notebook.")
-      }
     }
   }
 
