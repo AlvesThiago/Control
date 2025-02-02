@@ -1,82 +1,92 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { db } from "@/utils/db"
-import { Notebooks } from "@/utils/schema"
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 function RegisterNote() {
-  const [serialNumber, setSerialNumber] = useState("")
-  const [modelo, setModelo] = useState("")
-  const [setorNote, setSetorNote] = useState("")
-  const [statusNote, setStatusNote] = useState("")
-  const [message, setMessage] = useState<string | null>(null)
-  const [messageType, setMessageType] = useState<"success" | "error" | null>(null)
+  const [serialNumber, setSerialNumber] = useState("");
+  const [modelo, setModelo] = useState("");
+  const [setorNote, setSetorNote] = useState("");
+  const [statusNote, setStatusNote] = useState("");
+  const [message, setMessage] = useState<string | null>(null);
+  const [messageType, setMessageType] = useState<"success" | "error" | null>(null);
 
-  const setores = ["Granel", "Recebimento", "Volumoso", "Armazenagem", "Esteira", "Aéreo", "Retrabalho", "Expedição", "IS", "Estoque"]
-  const statusOptions = ["Bom", "Validar", "Ruim"]
-  const modeloEquipamento = ["I3", "I5", "I7", "Impressora"]
+  const setores = ["Granel", "Recebimento", "Volumoso", "Armazenagem", "Esteira", "Aéreo", "Retrabalho", "Expedição", "IS", "Estoque"];
+  const statusOptions = ["Bom", "Validar", "Ruim"];
+  const modeloEquipamento = ["I3", "I5", "I7", "Impressora"];
 
   const RegistroNotebook = async (serialNumber: string, modelo: string, setorNote: string, statusNote: string) => {
     try {
-      const result = await db.insert(Notebooks).values({
-        serialNumber: serialNumber || "",
-        modelo: modelo || "",
-        setorNote: setorNote || "",
-        statusNote: statusNote || "",
-      })
-      return result
+      const response = await fetch("/api/notebooks", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ serialNumber, modelo, setorNote, statusNote }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error || "Erro ao cadastrar notebook.");
+      }
+
+      return data;
     } catch (error) {
-      console.error("Erro ao registrar o notebook:", error)
-      throw new Error("Falha ao registrar notebook")
+      console.error("Erro ao registrar o notebook:", error);
+      if (error instanceof Error) {
+        throw new Error(error.message || "Erro ao cadastrar notebook.");
+      } else {
+        throw new Error("Erro ao cadastrar notebook.");
+      }
     }
-  }
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
 
     if (!serialNumber || !modelo || !setorNote || !statusNote) {
-      setMessage("Por favor, preencha todos os campos.")
-      setMessageType("error")
+      setMessage("Por favor, preencha todos os campos.");
+      setMessageType("error");
       setTimeout(() => {
-        setMessage(null)
-        setMessageType(null)
-      }, 3000)
-      return
+        setMessage(null);
+        setMessageType(null);
+      }, 3000);
+      return;
     }
 
     RegistroNotebook(serialNumber, modelo, setorNote, statusNote)
       .then(() => {
-        setMessage("Notebook cadastrado com sucesso!")
-        setMessageType("success")
+        setMessage("Notebook cadastrado com sucesso!");
+        setMessageType("success");
 
-        setSerialNumber("")
-        setModelo("")
-        setSetorNote("")
-        setStatusNote("")
+        setSerialNumber("");
+        setModelo("");
+        setSetorNote("");
+        setStatusNote("");
 
         setTimeout(() => {
-          setMessage(null)
-          setMessageType(null)
-        }, 3000)
+          setMessage(null);
+          setMessageType(null);
+        }, 3000);
       })
       .catch((error) => {
-        setMessage("Erro ao cadastrar notebook: " + error.message)
-        setMessageType("error")
+        setMessage("Erro ao cadastrar notebook: " + error.message);
+        setMessageType("error");
 
         setTimeout(() => {
-          setMessage(null)
-          setMessageType(null)
-        }, 3000)
-      })
-  }
+          setMessage(null);
+          setMessageType(null);
+        }, 3000);
+      });
+  };
 
   // Verifica se o formulário está completo
-  const isFormValid = serialNumber && modelo && setorNote && statusNote
+  const isFormValid = serialNumber && modelo && setorNote && statusNote;
 
   return (
     <div className="container mx-auto py-6 px-4">
@@ -99,7 +109,7 @@ function RegisterNote() {
               <div className="flex flex-col space-y-1.5">
                 <Label htmlFor="modeloNote">Modelo do Equipamento</Label>
                 <Select value={modelo} onValueChange={setModelo}>
-                  <SelectTrigger id="setorNote">
+                  <SelectTrigger id="modeloNote">
                     <SelectValue placeholder="Selecione o equipamento" />
                   </SelectTrigger>
                   <SelectContent>
@@ -159,7 +169,7 @@ function RegisterNote() {
         </CardContent>
       </Card>
     </div>
-  )
+  );
 }
 
-export default RegisterNote
+export default RegisterNote;
