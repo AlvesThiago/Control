@@ -56,6 +56,7 @@ export default function DataTableNote() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
   const [selectedNotebook, setSelectedNotebook] = useState<Notebook | null>(null)
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false)
   const router = useRouter()
 
   const handleDelete = useCallback(async (id: number) => {
@@ -133,8 +134,13 @@ export default function DataTableNote() {
                   Copiar ID
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => router.push(`/notebooks/${notebook.id}/edit`)}>
-                  Editar
+                <DropdownMenuItem
+                  onClick={() => {
+                    setSelectedNotebook(notebook)
+                    setIsUpdateModalOpen(true)
+                  }}
+                >
+                  Atualizar
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => handleDelete(notebook.id)}>Excluir</DropdownMenuItem>
               </DropdownMenuContent>
@@ -151,6 +157,7 @@ export default function DataTableNote() {
     updatedData: { serialNumber: string; modelo: string; setorNote: string; statusNote: string },
   ) => {
     try {
+      setLoading(true)
       const response = await fetch(`/api/notebooks`, {
         method: "PUT",
         headers: {
@@ -160,9 +167,13 @@ export default function DataTableNote() {
       })
       if (!response.ok) throw new Error("Erro ao atualizar notebook")
       await fetchTableData()
+      setIsUpdateModalOpen(false)
+      setSelectedNotebook(null)
     } catch (error) {
       console.error("Error updating notebook:", error)
       setError("Erro ao atualizar o notebook.")
+    } finally {
+      setLoading(false)
     }
   }
 
@@ -241,6 +252,11 @@ export default function DataTableNote() {
 
   return (
     <div className="w-full overflow-auto max-h-[600px]">
+      {loading && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-4 rounded-md">Atualizando...</div>
+        </div>
+      )}
       <div className="flex items-center justify-between space-x-4">
         <div>
           <h2 className="font-bold">Listar Equipamento</h2>
@@ -338,8 +354,11 @@ export default function DataTableNote() {
       {selectedNotebook && (
         <UpdateNotebookModal
           notebook={selectedNotebook}
-          isOpen={!!selectedNotebook}
-          onClose={() => setSelectedNotebook(null)}
+          isOpen={isUpdateModalOpen}
+          onClose={() => {
+            setIsUpdateModalOpen(false)
+            setSelectedNotebook(null)
+          }}
           onUpdate={handleUpdate}
         />
       )}
