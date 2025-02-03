@@ -4,7 +4,7 @@ import { Usuarios } from "@/utils/schema"
 import { eq } from "drizzle-orm"
 
 export async function PUT(request: NextRequest, { params }: { params: { id: string } }) {
-  const id = Number.parseInt(params.id)
+  const id = Number.parseInt(params.id)  // A tipagem de params já está correta aqui
   const body = await request.json()
 
   try {
@@ -29,4 +29,3 @@ export async function DELETE(request: NextRequest, { params }: { params: { id: s
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 })
   }
 }
-
