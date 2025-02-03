@@ -7,7 +7,6 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/componen
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import Image from "next/image"
-import { checkNotebookStatus, updateNotebookStatus } from "@/utils/notebookStatus"
 import Notification from "./Notification"
 
 export function Main() {
@@ -28,11 +27,21 @@ export function Main() {
     setLoading(true)
     setNotification(null)
     try {
-      const { usuario, notebook, isCheckedOut, isManager } = await checkNotebookStatus(idcracha, serialNumber)
+      const checkResponse = await fetch("/api/registro", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "check", idcracha, serialNumber }),
+      })
+      const { usuario, notebook, isCheckedOut, isManager } = await checkResponse.json()
+
+      const updateResponse = await fetch("/api/registro", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "update", idcracha, serialNumber }),
+      })
+      await updateResponse.json()
 
       const novaAcao = isCheckedOut ? "Devolução" : "Retirada"
-      await updateNotebookStatus(usuario.nome, notebook.serialNumber, !isCheckedOut)
-
       let mensagem = `${novaAcao} registrada com sucesso para o ${isManager ? "gestor" : "usuário"} ${usuario.nome} e notebook ${notebook.serialNumber}!`
       if (isManager) {
         mensagem += " (Ação realizada como gestor)"
@@ -51,19 +60,11 @@ export function Main() {
       // Voltar o foco para o input de crachá
       idcrachaRef.current?.focus()
     } catch (error) {
-      if (error instanceof Error) {
-        setNotification({
-          id: Date.now(),
-          message: error.message,
-          type: "error",
-        })
-      } else {
-        setNotification({
-          id: Date.now(),
-          message: "Ocorreu um erro ao processar a ação.",
-          type: "error",
-        })
-      }
+      setNotification({
+        id: Date.now(),
+        message: error instanceof Error ? error.message : "Ocorreu um erro ao processar a ação.",
+        type: "error",
+      })
     } finally {
       setLoading(false)
     }
@@ -148,11 +149,7 @@ export function Main() {
             )}
           </CardContent>
           <CardFooter className="flex justify-end">
-            <Button
-              ref={buttonRef}
-              onClick={handleAction}
-              disabled={loading || !idcracha || !serialNumber}
-            >
+            <Button ref={buttonRef} onClick={handleAction} disabled={loading || !idcracha || !serialNumber}>
               {loading ? "Processando..." : "Verificar"}
             </Button>
           </CardFooter>
@@ -160,11 +157,18 @@ export function Main() {
       </div>
       <footer className="w-full bg-[#001220] text-sm text-white text-center py-4">
         <p>
-          Desenvolvedor Thiago Alves - <a href="https://www.linkedin.com/in/thiagoaalves/" target="_blank" rel="noopener noreferrer" className="text-blue-400">LinkedIn</a>
+          Desenvolvedor Thiago Alves -{" "}
+          <a
+            href="https://www.linkedin.com/in/thiagoaalves/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-blue-400"
+          >
+            LinkedIn
+          </a>
         </p>
       </footer>
     </>
-
-
   )
 }
+

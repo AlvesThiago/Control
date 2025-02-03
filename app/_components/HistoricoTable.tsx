@@ -1,6 +1,4 @@
-'use client'
-import { db } from "@/utils/db"
-import { Historico } from "@/utils/schema"
+"use client"
 import type React from "react"
 import { useState, useEffect } from "react"
 
@@ -8,24 +6,7 @@ interface HistoricoItem {
   nome: string | null
   setor: string | null
   acao: string | null
-  data: Date | null
-}
-
-async function fetchListHistorico() {
-  const result = await db.select({
-    id: Historico.id,
-    usuarios: Historico.usuarios,
-    notebook: Historico.notebook,
-    tipo: Historico.tipo,
-    createAt: Historico.createdAt
-  }).from(Historico).execute()
-
-  return result.map((item) => ({
-    nome: item.usuarios || null,
-    setor: item.notebook || null,
-    acao: item.tipo || null,
-    data: item.createAt || null
-  }))
+  data: string | null
 }
 
 const HistoricoTable: React.FC = () => {
@@ -33,47 +14,48 @@ const HistoricoTable: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState("")
 
   useEffect(() => {
-    const loadData = async () => {
-      const data = await fetchListHistorico()
-      setHistoricoData(data)
+    const fetchHistorico = async () => {
+      try {
+        const response = await fetch("/api/historico")
+        if (!response.ok) {
+          throw new Error("Falha ao buscar dados do histórico")
+        }
+        const data = await response.json()
+        setHistoricoData(data)
+      } catch (error) {
+        console.error("Erro ao carregar dados:", error)
+      }
     }
 
-    loadData()
+    fetchHistorico()
   }, [])
 
-  const filteredData = historicoData.filter((item) =>
-    item.nome?.toLowerCase().includes(searchTerm.toLowerCase()) || ""
-  )
+  const filteredData = historicoData.filter((item) => item.nome?.toLowerCase().includes(searchTerm.toLowerCase()) || "")
 
-  const formatDate = (date: Date | null) => {
-    if (!date) return ""
-    // Formata a data e hora no formato brasileiro
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return ""
+    const date = new Date(dateString)
     return date.toLocaleString("pt-BR", {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      second: '2-digit',
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
     })
   }
 
   const exportToCSV = () => {
     const header = ["Nome", "Setor", "Ação", "Data"]
-    const rows = filteredData.map(item => [
+    const rows = filteredData.map((item) => [
       item.nome ?? "N/A",
       item.setor ?? "N/A",
       item.acao ?? "N/A",
       formatDate(item.data),
     ])
 
-    // Criando o conteúdo CSV
-    const csvContent = [
-      header.join(","), // Cabeçalho
-      ...rows.map(row => row.join(",")), // Linhas de dados
-    ].join("\n")
+    const csvContent = [header.join(","), ...rows.map((row) => row.join(","))].join("\n")
 
-    // Criando um link para download
     const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
     const link = document.createElement("a")
     const url = URL.createObjectURL(blob)
@@ -96,10 +78,7 @@ const HistoricoTable: React.FC = () => {
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
         />
-        <button
-          onClick={exportToCSV}
-          className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-        >
+        <button onClick={exportToCSV} className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600">
           Exportar
         </button>
       </div>
@@ -131,3 +110,4 @@ const HistoricoTable: React.FC = () => {
 }
 
 export default HistoricoTable
+
