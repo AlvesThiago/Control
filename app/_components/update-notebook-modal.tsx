@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
+import { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import {
   Dialog,
   DialogContent,
@@ -10,62 +10,69 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from "@/components/ui/dialog"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { db } from "@/utils/db"
-import { Notebooks } from "@/utils/schema"
-import { eq } from "drizzle-orm"
+} from "@/components/ui/dialog";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 
 interface UpdateNotebookModalProps {
   notebook: {
-    id: number
-    serialNumber: string
-    modelo: string | null
-    setorNote: string | null
-    statusNote: string | null
-  }
-  isOpen: boolean
-  onClose: () => void
-  onUpdate: (id: number, data: { serialNumber: string; modelo: string; setorNote: string; statusNote: string }) => void
+    id: number;
+    serialNumber: string;
+    modelo: string | null;
+    setorNote: string | null;
+    statusNote: string | null;
+  };
+  isOpen: boolean;
+  onClose: () => void;
+  onUpdate: (
+    id: number,
+    data: { serialNumber: string; modelo: string; setorNote: string; statusNote: string }
+  ) => void;
 }
 
 export function UpdateNotebookModal({ notebook, isOpen, onClose, onUpdate }: UpdateNotebookModalProps) {
-  const [serialNumber, setSerialNumber] = useState(notebook.serialNumber)
-  const [modelo, setModelo] = useState(notebook.modelo || "")
-  const [setorNote, setSetorNote] = useState(notebook.setorNote || "")
-  const [statusNote, setStatusNote] = useState(notebook.statusNote || "")
+  const [serialNumber, setSerialNumber] = useState(notebook.serialNumber);
+  const [modelo, setModelo] = useState(notebook.modelo || "");
+  const [setorNote, setSetorNote] = useState(notebook.setorNote || "");
+  const [statusNote, setStatusNote] = useState(notebook.statusNote || "");
 
-  const setores = ["Granel", "Recebimento", "Volumoso", "Armazenagem", "Esteira", "Aéreo", "Retrabalho", "Expedição", "IS", "Estoque"]
-  const statusOptions = ["Bom", "Validar", "Ruim"]
+  const setores = ["Granel", "Recebimento", "Volumoso", "Armazenagem", "Esteira", "Aéreo", "Retrabalho", "Expedição", "IS", "Estoque"];
+  const statusOptions = ["Bom", "Validar", "Ruim"];
 
   useEffect(() => {
-    setSerialNumber(notebook.serialNumber)
-    setModelo(notebook.modelo || "")
-    setSetorNote(notebook.setorNote || "")
-    setStatusNote(notebook.statusNote || "")
-  }, [notebook])
+    setSerialNumber(notebook.serialNumber);
+    setModelo(notebook.modelo || "");
+    setSetorNote(notebook.setorNote || "");
+    setStatusNote(notebook.statusNote || "");
+  }, [notebook]);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
+    e.preventDefault();
     try {
-      await db
-        .update(Notebooks)
-        .set({
+      const response = await fetch("/api/notebooks", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          id: notebook.id,
           serialNumber,
           modelo,
           setorNote,
           statusNote,
-        })
-        .where(eq(Notebooks.id, notebook.id))
-        .execute()
+        }),
+      });
 
-      onUpdate(notebook.id, { serialNumber, modelo, setorNote, statusNote })
-      onClose()
+      if (!response.ok) {
+        throw new Error("Erro ao atualizar notebook");
+      }
+
+      onUpdate(notebook.id, { serialNumber, modelo, setorNote, statusNote });
+      onClose();
     } catch (error) {
-      console.error("Error updating notebook:", error)
-      // You might want to show an error message to the user here
+      console.error("Error updating notebook:", error);
+      // Adicione um tratamento de erro para o usuário (ex: toast)
     }
-  }
+  };
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -134,6 +141,5 @@ export function UpdateNotebookModal({ notebook, isOpen, onClose, onUpdate }: Upd
         </form>
       </DialogContent>
     </Dialog>
-  )
+  );
 }
-
