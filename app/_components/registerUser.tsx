@@ -1,15 +1,8 @@
 import { Button } from "@/components/ui/button";
-import {
-    Card,
-    CardContent,
-    CardHeader,
-    CardTitle,
-} from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { db } from "@/utils/db";
-import { Usuarios } from "@/utils/schema";
 import { useState } from "react";
 
 function RegisterUser() {
@@ -25,27 +18,41 @@ function RegisterUser() {
     const setores = ["Granel", "Recebimento", "Volumoso", "Armazenagem", "Esteira", "Aéreo", "Retrabalho", "Expedição", "IS"];
     const turnos = ["T1", "T2", "T3"];
 
-    const RegistrodeUsuarios = async (nome: string, idcracha: string, cpf: string, setor: string, gestor: string, turno: string) => {
+    const RegistrodeUsuarios = async () => {
         try {
-            const result = await db.insert(Usuarios).values({
-                nome: nome || '',
-                idcracha: idcracha || '',
-                cpf: cpf || '',
-                setor: setor || '',
-                gestor: gestor || '',
-                turno: turno || '',
+            const response = await fetch("/api/usuarios", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ nome, idcracha: idCracha, cpf, setor, gestor, turno }),
             });
-            return result;
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                throw new Error(data.error || "Erro desconhecido");
+            }
+
+            setMessage("Usuário cadastrado com sucesso!");
+            setMessageType("success");
+            setNome("");
+            setIdCracha("");
+            setCpf("");
+            setSetor("");
+            setGestor("");
+            setTurno("");
         } catch (error) {
-            console.error("Erro ao registrar o usuário:", error);
-            throw new Error("Falha ao registrar usuário");
+            setMessage("Erro ao cadastrar usuário: " + (error instanceof Error ? error.message : "Erro desconhecido"));
+            setMessageType("error");
+        } finally {
+            setTimeout(() => {
+                setMessage(null);
+                setMessageType(null);
+            }, 3000);
         }
     };
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-
-        // Validação: verificar se todos os campos estão preenchidos
         if (!nome || !idCracha || !cpf || !setor || !gestor || !turno) {
             setMessage("Por favor, preencha todos os campos.");
             setMessageType("error");
@@ -55,30 +62,7 @@ function RegisterUser() {
             }, 3000);
             return;
         }
-
-        RegistrodeUsuarios(nome, idCracha, cpf, setor, gestor, turno)
-            .then(() => {
-                setMessage("Usuário cadastrado com sucesso!");
-                setMessageType("success");
-                setNome("");
-                setIdCracha("");
-                setCpf("");
-                setSetor("");
-                setGestor("");
-                setTurno("");
-                setTimeout(() => {
-                    setMessage(null);
-                    setMessageType(null);
-                }, 3000);
-            })
-            .catch((error) => {
-                setMessage("Erro ao cadastrar usuário: " + error.message);
-                setMessageType("error");
-                setTimeout(() => {
-                    setMessage(null);
-                    setMessageType(null);
-                }, 3000);
-            });
+        RegistrodeUsuarios();
     };
 
     return (
@@ -92,32 +76,15 @@ function RegisterUser() {
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div className="space-y-2">
                                 <Label htmlFor="name">Colaborador</Label>
-                                <Input
-                                    id="name"
-                                    placeholder="Nome completo"
-                                    value={nome}
-                                    onChange={(e) => setNome(e.target.value)}
-                                />
+                                <Input id="name" placeholder="Nome completo" value={nome} onChange={(e) => setNome(e.target.value)} />
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="Idcracha">ID Crachá</Label>
-                                <Input
-                                    type="number"
-                                    id="Idcracha"
-                                    placeholder="Ex: 123455"
-                                    value={idCracha}
-                                    onChange={(e) => setIdCracha(e.target.value)}
-                                />
+                                <Input type="number" id="Idcracha" placeholder="Ex: 123455" value={idCracha} onChange={(e) => setIdCracha(e.target.value)} />
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="cpf">CPF</Label>
-                                <Input
-                                    type="number"
-                                    id="cpf"
-                                    placeholder="Ex: 123.123.123.32"
-                                    value={cpf}
-                                    onChange={(e) => setCpf(e.target.value)}
-                                />
+                                <Input type="number" id="cpf" placeholder="Ex: 123.123.123.32" value={cpf} onChange={(e) => setCpf(e.target.value)} />
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="setor">Setor</Label>
@@ -127,33 +94,24 @@ function RegisterUser() {
                                     </SelectTrigger>
                                     <SelectContent>
                                         {setores.map((setor) => (
-                                            <SelectItem key={setor} value={setor}>
-                                                {setor}
-                                            </SelectItem>
+                                            <SelectItem key={setor} value={setor}>{setor}</SelectItem>
                                         ))}
                                     </SelectContent>
                                 </Select>
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="gestor">Gestor</Label>
-                                <Input
-                                    id="gestor"
-                                    placeholder="Digite o nome do seu gestor"
-                                    value={gestor}
-                                    onChange={(e) => setGestor(e.target.value)}
-                                />
+                                <Input id="gestor" placeholder="Digite o nome do seu gestor" value={gestor} onChange={(e) => setGestor(e.target.value)} />
                             </div>
                             <div className="space-y-2">
                                 <Label htmlFor="turno">Turno</Label>
                                 <Select value={turno} onValueChange={setTurno}>
-                                    <SelectTrigger id="setorNote">
+                                    <SelectTrigger>
                                         <SelectValue placeholder="Selecione um turno" />
                                     </SelectTrigger>
                                     <SelectContent>
                                         {turnos.map((turnos) => (
-                                            <SelectItem key={turnos} value={turnos}>
-                                                {turnos}
-                                            </SelectItem>
+                                            <SelectItem key={turnos} value={turnos}>{turnos}</SelectItem>
                                         ))}
                                     </SelectContent>
                                 </Select>
@@ -163,17 +121,7 @@ function RegisterUser() {
                             <Button type="submit" className="w-full md:w-auto">Cadastrar Usuário</Button>
                         </div>
                     </form>
-
-                    {message && (
-                        <div
-                            className={`mt-4 text-center p-2 rounded-md ${messageType === "success"
-                                    ? "bg-green-500 text-white"
-                                    : "bg-red-500 text-white"
-                                }`}
-                        >
-                            {message}
-                        </div>
-                    )}
+                    {message && <div className={`mt-4 text-center p-2 rounded-md ${messageType === "success" ? "bg-green-500 text-white" : "bg-red-500 text-white"}`}>{message}</div>}
                 </CardContent>
             </Card>
         </div>
