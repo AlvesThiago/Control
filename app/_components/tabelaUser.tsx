@@ -42,7 +42,7 @@ async function fetchListUsuarios(): Promise<Employee[]> {
 }
 
 // Função para excluir um usuário
-async function deleteUser(id: number): Promise<void> {
+async function deleteUser(): Promise<void> {
   const response = await fetch(`/api/usuarios`, {
     method: "DELETE",
   })
@@ -158,7 +158,7 @@ export default function DataTableDemo() {
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => setEditingEmployee(employee)}>Atualizar</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleDelete(employee.id)}>Excluir</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleDelete()}>Excluir</DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
         )
@@ -217,10 +217,10 @@ export default function DataTableDemo() {
     }
   }
 
-  const handleDelete = async (id: number) => {
+  const handleDelete = async ( ) => {
     if (window.confirm("Tem certeza que deseja excluir este usuário?")) {
       try {
-        await deleteUser(id)
+        await deleteUser()
         await fetchTableData()
         toast({
           title: "Usuário excluído",
