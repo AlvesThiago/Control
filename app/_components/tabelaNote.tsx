@@ -26,7 +26,6 @@ import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { useState, useMemo, useCallback } from "react"
 import { UpdateNotebookModal } from "./update-notebook-modal"
-import { useRouter } from "next/navigation"
 
 export type Notebook = {
   id: number
@@ -58,21 +57,37 @@ export default function DataTableNote() {
   const [selectedNotebook, setSelectedNotebook] = useState<Notebook | null>(null)
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false)
 
-
-  const handleDelete = useCallback(async (id: number) => {
-    if (window.confirm("Tem certeza que deseja excluir este notebook?")) {
-      try {
-        const response = await fetch(`/api/notebooks?id=${id}`, {
-          method: "DELETE",
-        })
-        if (!response.ok) throw new Error("Erro ao excluir notebook")
-        await fetchTableData()
-      } catch (error) {
-        console.error("Error deleting notebook:", error)
-        setError("Erro ao excluir o notebook.")
-      }
+  const fetchTableData = useCallback(async () => {
+    setLoading(true)
+    try {
+      const notebooks = await fetchListNotes()
+      setData(notebooks)
+      setError(null)
+    } catch (error) {
+      setError("Erro ao carregar dados.")
+      console.error(error)
+    } finally {
+      setLoading(false)
     }
   }, [])
+
+  const handleDelete = useCallback(
+    async (id: number) => {
+      if (window.confirm("Tem certeza que deseja excluir este notebook?")) {
+        try {
+          const response = await fetch(`/api/notebooks?id=${id}`, {
+            method: "DELETE",
+          })
+          if (!response.ok) throw new Error("Erro ao excluir notebook")
+          await fetchTableData()
+        } catch (error) {
+          console.error("Error deleting notebook:", error)
+          setError("Erro ao excluir o notebook.")
+        }
+      }
+    },
+    [fetchTableData],
+  )
 
   const columns = useMemo<ColumnDef<Notebook>[]>(
     () => [
@@ -176,20 +191,6 @@ export default function DataTableNote() {
       setLoading(false)
     }
   }
-
-  const fetchTableData = useCallback(async () => {
-    setLoading(true)
-    try {
-      const notebooks = await fetchListNotes()
-      setData(notebooks)
-      setError(null)
-    } catch (error) {
-      setError("Erro ao carregar dados.")
-      console.error(error)
-    } finally {
-      setLoading(false)
-    }
-  }, [])
 
   React.useEffect(() => {
     fetchTableData()
