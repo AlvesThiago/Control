@@ -57,7 +57,7 @@ export default function DataTableNote() {
   const [error, setError] = useState<string | null>(null)
   const [selectedNotebook, setSelectedNotebook] = useState<Notebook | null>(null)
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false)
-  const router = useRouter()
+
 
   const handleDelete = useCallback(async (id: number) => {
     if (window.confirm("Tem certeza que deseja excluir este notebook?")) {
@@ -149,7 +149,7 @@ export default function DataTableNote() {
         },
       },
     ],
-    [handleDelete, router],
+    [handleDelete],
   )
 
   const handleUpdate = async (
