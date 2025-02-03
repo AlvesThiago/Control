@@ -6,9 +6,6 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Trash2, Edit2, Save, X } from "lucide-react"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
-import { db } from "@/utils/db"
-import { Gestores } from "@/utils/schema"
-import { eq } from "drizzle-orm"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 
 interface GestoresList {
@@ -39,15 +36,11 @@ export default function ListGestores() {
 
   async function fetchListGestores() {
     try {
-      const result = await db
-        .select({
-          id: Gestores.id,
-          gestor: Gestores.gestor,
-          setorGestor: Gestores.setorGestor,
-        })
-        .from(Gestores)
-        .execute()
-
+      const response = await fetch("/api/gestores")
+      if (!response.ok) {
+        throw new Error("Failed to fetch gestores")
+      }
+      const result = await response.json()
       setGestores(result)
     } catch (error) {
       console.error("Error fetching gestores:", error)
@@ -60,8 +53,16 @@ export default function ListGestores() {
 
   const salvarEdicao = async (id: number, novoSetor: string) => {
     try {
-      await db.update(Gestores).set({ setorGestor: novoSetor }).where(eq(Gestores.id, id)).execute()
-
+      const response = await fetch("/api/gestores", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id, setorGestor: novoSetor }),
+      })
+      if (!response.ok) {
+        throw new Error("Failed to update gestor")
+      }
       setGestores(gestores.map((gestor) => (gestor.id === id ? { ...gestor, setorGestor: novoSetor } : gestor)))
       setEditando(null)
     } catch (error) {
@@ -75,8 +76,16 @@ export default function ListGestores() {
 
   const excluirGestor = async (id: number) => {
     try {
-      await db.delete(Gestores).where(eq(Gestores.id, id)).execute()
-
+      const response = await fetch("/api/gestores", {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ id }),
+      })
+      if (!response.ok) {
+        throw new Error("Failed to delete gestor")
+      }
       setGestores(gestores.filter((gestor) => gestor.id !== id))
     } catch (error) {
       console.error("Error deleting gestor:", error)
