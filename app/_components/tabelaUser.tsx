@@ -43,7 +43,7 @@ async function fetchListUsuarios(): Promise<Employee[]> {
 
 // Função para excluir um usuário
 async function deleteUser(id: number): Promise<void> {
-  const response = await fetch(`/api/usuarios/${id}`, {
+  const response = await fetch(`/api/usuarios`, {
     method: "DELETE",
   })
   if (!response.ok) {
@@ -188,7 +188,7 @@ export default function DataTableDemo() {
   const handleUpdate = async (id: number, updatedData: Partial<Employee>) => {
     try {
       setLoading(true)
-      const response = await fetch(`/api/usuarios/${id}`, {
+      const response = await fetch(`/api/usuarios`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",

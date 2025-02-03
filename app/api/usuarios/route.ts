@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { db } from "@/utils/db";
 import { Usuarios } from "@/utils/schema";
+import { eq } from "drizzle-orm";
 
 export async function POST(req: Request) {
   try {
@@ -64,5 +65,48 @@ export async function GET() {
       { error: "Internal Server Error" },
       { status: 500 }
     );
+  }
+}
+
+export async function PUT(req: Request) {
+  const body = await req.json();
+
+  const { id, nome, idcracha, cpf, setor, gestor, turno } = body;
+
+  // Validação básica
+  if (!id || !nome || !idcracha || !cpf || !setor || !gestor || !turno) {
+    return NextResponse.json(
+      { error: "Todos os campos são obrigatórios." },
+      { status: 400 }
+    );
+  }
+
+  try {
+    await db.update(Usuarios).set(body).where(eq(Usuarios.id, id)).execute();
+
+    return NextResponse.json({ message: "Usuário atualizado com sucesso!" });
+  } catch (error) {
+    console.error("Erro ao atualizar o usuário:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: Request) {
+  const { id } = await req.json();
+
+  if (!id) {
+    return NextResponse.json(
+      { error: "O campo 'id' é obrigatório." },
+      { status: 400 }
+    );
+  }
+
+  try {
+    await db.delete(Usuarios).where(eq(Usuarios.id, id)).execute();
+
+    return NextResponse.json({ message: "Usuário deletado com sucesso!" });
+  } catch (error) {
+    console.error("Erro ao deletar o usuário:", error);
+    return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
