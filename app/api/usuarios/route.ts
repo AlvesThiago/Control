@@ -1,7 +1,6 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextResponse } from "next/server";
 import { db } from "@/utils/db";
 import { Usuarios } from "@/utils/schema";
-import { eq } from "drizzle-orm";
 
 export async function POST(req: Request) {
   try {
